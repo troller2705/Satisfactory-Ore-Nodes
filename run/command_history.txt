@@ -1,0 +1,4 @@
+/give @s satisfactory_ore_nodes:example_block
+/setblock ~ ~ ~ satisfactory_ore_nodes:iron_node[purity=0]
+/setblock ~ ~-1 ~ air
+/setblock ~ ~ ~ satisfactory_ore_nodes:iron_node[purity=2]

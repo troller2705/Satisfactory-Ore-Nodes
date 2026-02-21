@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "purity=0": { "model": "yourmod:block/iron_node_impure" },
+    "purity=1": { "model": "yourmod:block/iron_node_normal" },
+    "purity=2": { "model": "yourmod:block/iron_node_pure" }
+  }
+}
