@@ -1,0 +1,29 @@
+# Main Class
+cpw.mods.bootstraplauncher.BootstrapLauncher
+
+# NeoForge Run-Type Program Arguments
+--launchTarget
+forgedatadev
+--assetIndex
+17
+--assetsDir
+C:\\Users\\Cole\\.gradle\\caches\\neoformruntime\\assets
+--gameDir
+.
+--fml.fmlVersion
+4.0.42
+--fml.mcVersion
+1.21.1
+--fml.neoForgeVersion
+21.1.219
+--fml.neoFormVersion
+20240808.144430
+
+# User Supplied Program Arguments
+--mod
+satisfactory_ore_nodes
+--all
+--output
+"D:\\MC Mods Custom\\Satisfactory Ore Nodes\\src\\generated\\resources"
+--existing
+"D:\\MC Mods Custom\\Satisfactory Ore Nodes\\src\\main\\resources"
