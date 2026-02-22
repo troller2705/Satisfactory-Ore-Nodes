@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "purity=0": { "model": "satisfactory_ore_nodes:block/copper_node_impure" },
+    "purity=1": { "model": "minecraft:block/copper_ore" },
+    "purity=2": { "model": "minecraft:block/raw_copper_block" }
+  }
+}

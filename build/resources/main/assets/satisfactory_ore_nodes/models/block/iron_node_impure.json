@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "satisfactory_ore_nodes:block/iron_node_impure"
+  }
+}

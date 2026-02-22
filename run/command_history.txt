@@ -2,3 +2,10 @@
 /setblock ~ ~ ~ satisfactory_ore_nodes:iron_node[purity=0]
 /setblock ~ ~-1 ~ air
 /setblock ~ ~ ~ satisfactory_ore_nodes:iron_node[purity=2]
+/setblock ~ ~-1 ~ air
+/gamemode survival
+/gamemode creative
+/setblock ~ ~ ~ satisfactory_ore_nodes:copper_node[purity=2]
+/setblock ~ ~ ~ satisfactory_ore_nodes:copper_node[purity=0]
+/setblock ~ ~ ~ satisfactory_ore_nodes:copper_node[purity=1]
+/setblock ~ ~ ~ satisfactory_ore_nodes:copper_node[purity=2]

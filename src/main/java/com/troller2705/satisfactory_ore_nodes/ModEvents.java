@@ -1,6 +1,7 @@
 package com.troller2705.satisfactory_ore_nodes;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -14,25 +15,38 @@ import net.neoforged.neoforge.event.level.BlockEvent;
 @EventBusSubscriber(modid = Satisfactory_ore_nodes.MODID)
 public class ModEvents {
 
+
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
-        System.out.println("BREAK EVENT TRIGGERED FOR: " + event.getState().getBlock().getName().getString());
         BlockState state = event.getState();
+        if (state.getBlock() instanceof ResourceNodeBlock nodeBlock) {
+            Player player = event.getPlayer();
 
-        // Check if the block being broken is our Resource Node
-        if (state.getBlock() instanceof ResourceNodeBlock) {
-            LevelAccessor level = event.getLevel();
-            BlockPos pos = event.getPos();
-            int purity = state.getValue(ResourceNodeBlock.PURITY);
+            // Check for Creative + Shift (Crouch)
+            if (player != null && player.isCreative() && player.isShiftKeyDown()) {
+                // Do NOT cancel the event. Do NOT drop extra items.
+                // Just let Minecraft delete the block.
+                return;
+            }
 
-            // Calculate yield based on purity (Impure=1, Normal=2, Pure=4)
-            int count = (int) Math.pow(2, purity);
+            // --- Otherwise, run the Infinite Logic ---
+            if (event.getLevel() instanceof Level serverLevel) {
+                // Cancel the break so it stays infinite
+                event.setCanceled(true);
 
-            // Spawn the items at the block's location
-            Block.popResource((Level) level, pos, new ItemStack(Items.RAW_IRON, count));
+                LevelAccessor level = event.getLevel();
+                BlockPos pos = event.getPos();
+                int purity = state.getValue(ResourceNodeBlock.PURITY);
 
-            // CANCEL the event so the block is never actually removed
-            event.setCanceled(true);
+                // Calculate yield based on purity (Impure=1, Normal=2, Pure=4)
+                int count = (int) Math.pow(2, purity);
+
+                // Spawn the items at the block's location
+                Block.popResource((Level) level, pos, new ItemStack(nodeBlock.getDropItem(), count));
+
+                serverLevel.sendBlockUpdated(event.getPos(), state, state, 3);
+            }
         }
     }
+
 }

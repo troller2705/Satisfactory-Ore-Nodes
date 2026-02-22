@@ -2,9 +2,6 @@ package com.troller2705.satisfactory_ore_nodes;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.particles.VibrationParticleOption;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -13,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gameevent.BlockPositionSource;
+
 
 public class NodeScannerItem extends Item {
     public NodeScannerItem(Properties properties) {
@@ -22,38 +19,47 @@ public class NodeScannerItem extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        if (!level.isClientSide) {
-            // 1. Search Logic (Server-side)
+        if (level.isClientSide) {
+            // CLIENT SIDE: Scan and save locally for the 3D renderer
             BlockPos playerPos = player.blockPosition();
-            BlockPos closest = null;
-            double minDist = Double.MAX_VALUE;
+            StringBuilder positions = new StringBuilder();
+            int foundCount = 0; // Initialize the counter here
 
-            // Scan a 64-block horizontal radius
-            for (BlockPos pos : BlockPos.betweenClosed(playerPos.offset(-64, -16, -64), playerPos.offset(64, 16, 64))) {
-                if (level.getBlockState(pos).getBlock() instanceof ResourceNodeBlock) {
-                    double dist = pos.distSqr(playerPos);
-                    if (dist < minDist) {
-                        minDist = dist;
-                        closest = pos.immutable();
+            // Scan 64 blocks out, 20 up/down
+            for (BlockPos pos : BlockPos.betweenClosed(playerPos.offset(-64, -20, -64), playerPos.offset(64, 20, 64))) {
+                // Get the block's unique ID
+                String blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()).toString();
+
+                // FIX: Check the list for a matching ID within the NodeEntry objects
+                // Inside NodeScannerItem scanning loop
+                boolean isScannable = false;
+                for (SatisfactoryFTBConfig.NodeEntry entry : SatisfactoryFTBConfig.scannableNodes) {
+                    if (entry.baseNodeId.equals(blockId)) {
+                        isScannable = true;
+                        break;
                     }
+                }
+
+                if (isScannable) {
+                    positions.append(pos.asLong()).append(",");
+                    foundCount++;
                 }
             }
 
-            if (closest != null) {
-                // Play "Target Acquired" sound
-                level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                        SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1.0f, 0.5f);
-
-                // Send a Vibration Particle (the purple sculk-like streak) toward the node
-                ((ServerLevel)level).sendParticles(new VibrationParticleOption(new BlockPositionSource(closest), 30),
-                        player.getX(), player.getY() + 1, player.getZ(), 1, 0, 0, 0, 0);
+            // Only update if we actually found something
+            if (foundCount > 0) {
+                player.getPersistentData().putString("scanned_nodes", positions.toString());
+                player.getPersistentData().putLong("last_scan_time", level.getGameTime());
             }
-        } else {
-            // 2. Visual Effect (Client-side)
+
             spawnPingWave(player);
+        } else {
+            // SERVER SIDE: Play the sound for all players to hear
+            level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                    SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 0.5f, 1.5f);
         }
 
-        player.getCooldowns().addCooldown(this, 40); // 2-second cooldown like Satisfactory
+        player.getCooldowns().addCooldown(this, 40);
         return InteractionResultHolder.success(player.getItemInHand(hand));
     }
 

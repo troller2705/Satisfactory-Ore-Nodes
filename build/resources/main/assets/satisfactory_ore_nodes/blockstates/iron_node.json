@@ -1,7 +1,7 @@
 {
   "variants": {
-    "purity=0": { "model": "yourmod:block/iron_node_impure" },
-    "purity=1": { "model": "yourmod:block/iron_node_normal" },
-    "purity=2": { "model": "yourmod:block/iron_node_pure" }
+    "purity=0": { "model": "satisfactory_ore_nodes:block/iron_node_impure" },
+    "purity=1": { "model": "minecraft:block/iron_ore" },
+    "purity=2": { "model": "minecraft:block/raw_iron_block" }
   }
 }

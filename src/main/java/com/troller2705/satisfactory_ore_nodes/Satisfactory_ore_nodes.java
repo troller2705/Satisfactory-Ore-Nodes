@@ -6,10 +6,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -24,6 +21,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -51,15 +50,23 @@ public class Satisfactory_ore_nodes {
             () -> new ResourceNodeBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
                     .strength(2.0f, 3600000.0f) // Hard to mine, but not bedrock-impossible
-                    .requiresCorrectToolForDrops()));
+                    .requiresCorrectToolForDrops(), Items.RAW_IRON));
+
+    public static final DeferredBlock<ResourceNodeBlock> COPPER_NODE = BLOCKS.register("copper_node",
+            () -> new ResourceNodeBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(2.0f, 3600000.0f) // Hard to mine, but not bedrock-impossible
+                    .requiresCorrectToolForDrops(), Items.RAW_COPPER));
 
     // Register the Block Entity and link it to your Iron Node block
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ResourceNodeBlockEntity>> NODE_BE =
             BLOCK_ENTITY_TYPES.register("node_be", () ->
-                    BlockEntityType.Builder.of(ResourceNodeBlockEntity::new, IRON_NODE.get()).build(null));
+                    BlockEntityType.Builder.of(ResourceNodeBlockEntity::new, IRON_NODE.get(), COPPER_NODE.get()).build(null));
 
     // 2. The BlockItem so we can hold the node
     public static final DeferredItem<BlockItem> IRON_NODE_ITEM = ITEMS.registerSimpleBlockItem("iron_node", IRON_NODE);
+
+    public static final DeferredItem<BlockItem> COPPER_NODE_ITEM = ITEMS.registerSimpleBlockItem("copper_node", COPPER_NODE);
 
     // 3. The Scanner Item
     public static final DeferredItem<Item> NODE_SCANNER = ITEMS.register("node_scanner",
@@ -72,10 +79,21 @@ public class Satisfactory_ore_nodes {
                     .icon(() -> IRON_NODE_ITEM.get().getDefaultInstance())
                     .displayItems((parameters, output) -> {
                         output.accept(IRON_NODE_ITEM.get());
+                        output.accept(COPPER_NODE_ITEM.get());
                         output.accept(NODE_SCANNER.get());
                     }).build());
 
     public Satisfactory_ore_nodes(IEventBus modEventBus, ModContainer modContainer) {
+        // Register FTB Library as the Config UI provider
+        if (Dist.CLIENT.isClient()) {
+            SatisfactoryFTBConfig.load(); // Load the .snbt file
+            modContainer.registerExtensionPoint(IConfigScreenFactory.class,
+                    (mc, parent) -> {
+                        SatisfactoryFTBConfig.openGui();
+                        return null; // FTB opens its own screen immediately
+                    });
+        }
+
         // Register our registers to the event bus
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
@@ -83,6 +101,7 @@ public class Satisfactory_ore_nodes {
         BLOCK_ENTITY_TYPES.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
+
 
         // This is important: NeoForge.EVENT_BUS is for GAME events (like your BreakEvent)
         // modEventBus is for REGISTRATION events.

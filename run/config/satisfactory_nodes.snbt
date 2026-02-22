@@ -1,0 +1,43 @@
+{
+	show_hud: true
+	show_compass: true
+	scan_duration: 60
+	nodes: [
+		{
+			color: 5636095
+			id: "satisfactory_ore_nodes:iron_node"
+			purities: [
+				{
+					visual: "minecraft:stone"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:iron_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:raw_iron_block"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			color: 16755200
+			id: "satisfactory_ore_nodes:copper_node"
+			purities: [
+				{
+					visual: "minecraft:stone"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:copper_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:raw_copper_block"
+					label: "Pure"
+				}
+			]
+		}
+	]
+}
