@@ -16,33 +16,29 @@ public class ResourceNodeRenderer implements BlockEntityRenderer<ResourceNodeBlo
 
     @Override
     public void render(ResourceNodeBlockEntity be, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
-        String oreId = be.getOreId();
-        int purity = be.getPurity();
-        String visualBlockId = "minecraft:stone"; // Fallback
+        BlockState state = be.getBlockState();
+        if (!(state.getBlock() instanceof ResourceNodeBlock)) return;
 
-        // Find visual from Config
-        for (SatisfactoryFTBConfig.NodeEntry node : SatisfactoryFTBConfig.scannableNodes) {
-            if (node.baseNodeId.equals(oreId)) {
-                if (purity < node.purities.size()) {
-                    visualBlockId = node.purities.get(purity).visualBlockId;
-                }
-                break;
-            }
-        }
+        // 1. Get the synced properties
+        int index = state.getValue(ResourceNodeBlock.ORE_INDEX);
+        int purity = state.getValue(ResourceNodeBlock.PURITY);
 
-        // Inside the render method
-        BlockState visualState = Blocks.MAGENTA_GLAZED_TERRACOTTA.defaultBlockState(); // ERROR TEXTURE
+        // 2. Safety check for config bounds
+        if (index >= SatisfactoryFTBConfig.scannableNodes.size()) return;
 
-        if (be.getOreId() != null && !be.getOreId().isEmpty() && !be.getOreId().equals("minecraft:air")) {
-            String visualId = be.getOreId(); // Fallback to itself
+        // 3. Lookup the visual block from your config
+        String visualId = SatisfactoryFTBConfig.scannableNodes.get(index).purities.get(purity).visualBlockId;
+        BlockState visualState = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(visualId)).defaultBlockState();
 
-            for (SatisfactoryFTBConfig.NodeEntry node : SatisfactoryFTBConfig.scannableNodes) {
-                if (node.baseNodeId.equals(be.getOreId())) {
-                    visualId = node.purities.get(be.getPurity()).visualBlockId;
-                    break;
-                }
-            }
-            visualState = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(visualId)).defaultBlockState();
-        }
+        // 4. CRITICAL FIX: Actually draw the block on the screen
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(
+                visualState,
+                poseStack,
+                buffer,
+                combinedLight,
+                combinedOverlay,
+                net.neoforged.neoforge.client.model.data.ModelData.EMPTY,
+                null
+        );
     }
 }

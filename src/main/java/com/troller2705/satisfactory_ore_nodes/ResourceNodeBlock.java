@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -37,18 +38,19 @@ public class ResourceNodeBlock extends Block implements EntityBlock
 {
     // Define the property (0 to 2)
     public static final IntegerProperty PURITY = IntegerProperty.create("purity", 0, 2);
+    public static final IntegerProperty ORE_INDEX = IntegerProperty.create("ore_index", 0, 64);
 
     // In ResourceNodeBlock.java
     public ResourceNodeBlock(Properties properties) {
         // strength(-1.0F, 3600000.0F) makes it bedrock-like (unbreakable by normal means)
         // but the BreakEvent will still fire when a player "tries" to mine it or a Drill hits it.
         super(properties.strength(2.0f, 3600000.0f));
-        this.registerDefaultState(this.stateDefinition.any().setValue(PURITY, 1));
+        this.registerDefaultState(this.stateDefinition.any().setValue(PURITY, 1).setValue(ORE_INDEX, 0));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(PURITY);
+        builder.add(PURITY, ORE_INDEX);
     }
 
     private void handleHarvest(Level level, BlockPos pos, BlockState state, @Nullable Player player) {
@@ -147,21 +149,27 @@ public class ResourceNodeBlock extends Block implements EntityBlock
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        if (!level.isClientSide) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof ResourceNodeBlockEntity nodeBE) {
-                CustomData data = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof ResourceNodeBlockEntity nodeBE) {
+            CustomData data = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+            CompoundTag tag = data.copyTag();
 
-                // This pulls the NBT from the item directly into the BE's loadAdditional method
-                data.loadInto(nodeBE, level.registryAccess());
+            String id = tag.getString("oreId");
+            int p = tag.getInt("purity");
 
-                // Sync the BlockState property with the NBT value
-                int p = nodeBE.getPurity();
-                level.setBlock(pos, state.setValue(PURITY, p), 3);
-
-                nodeBE.setChanged();
-                level.sendBlockUpdated(pos, state, state, 3);
+            // Find the index of this ore in your scannableNodes list
+            int index = 0;
+            for (int i = 0; i < SatisfactoryFTBConfig.scannableNodes.size(); i++) {
+                if (SatisfactoryFTBConfig.scannableNodes.get(i).baseNodeId.equals(id)) {
+                    index = i;
+                    break;
+                }
             }
+
+            nodeBE.setOreId(id);
+            nodeBE.setPurity(p);
+
+            // SYNC BOTH: This makes ore_index show up in F3 just like purity!
+            level.setBlock(pos, state.setValue(PURITY, p).setValue(ORE_INDEX, index), 3);
         }
     }
 

@@ -79,16 +79,19 @@ public class Satisfactory_ore_nodes {
 
                         // 2. Add a dynamic node for every ore in your config
                         for (SatisfactoryFTBConfig.NodeEntry node : SatisfactoryFTBConfig.scannableNodes) {
+                            // Inside your creative tab loop
                             ItemStack stack = new ItemStack(MASTER_NODE_ITEM.get());
 
-                            CompoundTag blockDataTag = new CompoundTag();
-                            // Must include the ID of your Block Entity
-                            blockDataTag.putString("id", "satisfactory_ore_nodes:node_be");
-                            blockDataTag.putString("oreId", node.baseNodeId);
-                            blockDataTag.putInt("purity", 1);
+                            // This is the root tag that tells the game which BE it belongs to
+                            CompoundTag rootTag = new CompoundTag();
+                            rootTag.putString("id", "satisfactory_ore_nodes:node_be");
 
-                            // FIX: Wrap the tag in CustomData and apply to the component
-                            stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(blockDataTag));
+                            // We add your custom data directly to the root so loadAdditional can see it
+                            rootTag.putString("oreId", node.baseNodeId);
+                            rootTag.putInt("purity", 1);
+
+                            // Apply to the component
+                            stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(rootTag));
 
                             // Name the item
                             String oreName = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(node.baseNodeId))

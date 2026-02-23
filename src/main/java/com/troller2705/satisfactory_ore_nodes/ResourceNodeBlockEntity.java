@@ -19,8 +19,8 @@ public class ResourceNodeBlockEntity extends BlockEntity
         this.oreId = oreId;
         this.setChanged();
         if (this.level != null) {
-            // This forces the client to re-run the Renderer
-            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
+            // Use flag 3 (1 | 2) to ensure the block is updated and the change is sent to the client
+            this.level.sendBlockUpdated(this.worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
     public String getOreId() { return oreId; }
@@ -29,12 +29,17 @@ public class ResourceNodeBlockEntity extends BlockEntity
     public int getPurity() { return purity; }
 
     // Save/Load purity to NBT so it survives world restarts
-    // Inside ResourceNodeBlockEntity.java
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        this.oreId = tag.getString("oreId"); // Use lowercase 'd'
+        this.oreId = tag.getString("oreId");
         this.purity = tag.getInt("purity");
+        System.out.println("LOADED ORE ID: " + this.oreId);
+
+        // CRITICAL: If we are on the server, tell the client about this new data
+        if (this.level != null && !this.level.isClientSide) {
+            this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
+        }
     }
 
     @Override
@@ -47,7 +52,7 @@ public class ResourceNodeBlockEntity extends BlockEntity
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries); // Crucial: Pack your oreId for the client
+        saveAdditional(tag, registries); // Ensures oreId and purity are in the packet
         return tag;
     }
 
@@ -61,10 +66,13 @@ public class ResourceNodeBlockEntity extends BlockEntity
     public void onDataPacket(net.minecraft.network.Connection net, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
         CompoundTag tag = pkt.getTag();
         if (tag != null) {
-            this.loadAdditional(tag, registries);
-            // Force a rerender now that we have the oreId
-            if (level != null && level.isClientSide) {
-                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            // Force load the ID immediately
+            this.oreId = tag.getString("oreId");
+            this.purity = tag.getInt("purity");
+
+            // This makes sure F3 sees the new data instantly on the client side
+            if (this.level != null && this.level.isClientSide) {
+                this.level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
         }
     }
