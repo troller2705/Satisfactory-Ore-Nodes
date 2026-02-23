@@ -10,3 +10,4 @@
 /setblock ~ ~ ~ satisfactory_ore_nodes:copper_node[purity=1]
 /setblock ~ ~ ~ satisfactory_ore_nodes:copper_node[purity=2]
 /setblock ~ ~ ~ satisfactory_ore_nodes:resource_node[purity=2]
+/setblock ~ ~ ~ satisfactory_ore_nodes:resource_node[purity=2,ore_index=0]

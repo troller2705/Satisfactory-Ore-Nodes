@@ -2,6 +2,8 @@ package com.troller2705.satisfactory_ore_nodes;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -10,6 +12,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 
 public class NodeScannerItem extends Item {
@@ -27,22 +31,25 @@ public class NodeScannerItem extends Item {
 
             // Scan 64 blocks out, 20 up/down
             for (BlockPos pos : BlockPos.betweenClosed(playerPos.offset(-64, -20, -64), playerPos.offset(64, 20, 64))) {
-                // Get the block's unique ID
-                String blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock()).toString();
+                BlockState scanState = level.getBlockState(pos);
 
-                // FIX: Check the list for a matching ID within the NodeEntry objects
-                // Inside NodeScannerItem scanning loop
-                boolean isScannable = false;
-                for (SatisfactoryFTBConfig.NodeEntry entry : SatisfactoryFTBConfig.scannableNodes) {
-                    if (entry.baseNodeId.equals(blockId)) {
-                        isScannable = true;
-                        break;
+                // 1. Look for the Master Node Block
+                if (scanState.getBlock() instanceof ResourceNodeBlock) {
+                    BlockEntity be = level.getBlockEntity(pos);
+                    if (be instanceof ResourceNodeBlockEntity nodeBE) {
+                        // 2. Extract data for the HUD
+                        String oreId = nodeBE.getOreId();
+                        int purity = scanState.getValue(ResourceNodeBlock.PURITY);
+
+                        // Get the friendly name (e.g., "Iron Ore")
+                        String oreName = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(oreId))
+                                .getName().getString();
+
+                        // 3. Save to your Waypoint/Beacon system
+                        // Example: beaconManager.addBeacon(pos, oreName, purity);
+                        positions.append(pos.asLong()).append("|").append(oreName).append("|").append(purity).append(",");
+                        foundCount++;
                     }
-                }
-
-                if (isScannable) {
-                    positions.append(pos.asLong()).append(",");
-                    foundCount++;
                 }
             }
 

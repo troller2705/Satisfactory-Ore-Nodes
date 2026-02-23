@@ -19,18 +19,21 @@ public class ResourceNodeRenderer implements BlockEntityRenderer<ResourceNodeBlo
         BlockState state = be.getBlockState();
         if (!(state.getBlock() instanceof ResourceNodeBlock)) return;
 
-        // 1. Get the synced properties
         int index = state.getValue(ResourceNodeBlock.ORE_INDEX);
         int purity = state.getValue(ResourceNodeBlock.PURITY);
 
-        // 2. Safety check for config bounds
         if (index >= SatisfactoryFTBConfig.scannableNodes.size()) return;
 
-        // 3. Lookup the visual block from your config
         String visualId = SatisfactoryFTBConfig.scannableNodes.get(index).purities.get(purity).visualBlockId;
         BlockState visualState = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(visualId)).defaultBlockState();
 
-        // 4. CRITICAL FIX: Actually draw the block on the screen
+        // FIXED RENDERING CALL
+        poseStack.pushPose();
+
+        // Ensure we are using the correct buffer for block rendering
+        net.minecraft.client.renderer.RenderType rt = net.minecraft.client.renderer.ItemBlockRenderTypes.getRenderLayer(visualState.getFluidState());
+        com.mojang.blaze3d.vertex.VertexConsumer vc = buffer.getBuffer(rt);
+
         Minecraft.getInstance().getBlockRenderer().renderSingleBlock(
                 visualState,
                 poseStack,
@@ -40,5 +43,7 @@ public class ResourceNodeRenderer implements BlockEntityRenderer<ResourceNodeBlo
                 net.neoforged.neoforge.client.model.data.ModelData.EMPTY,
                 null
         );
+
+        poseStack.popPose();
     }
 }

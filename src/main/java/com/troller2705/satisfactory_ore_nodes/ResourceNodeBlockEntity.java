@@ -34,7 +34,7 @@ public class ResourceNodeBlockEntity extends BlockEntity
         super.loadAdditional(tag, registries);
         this.oreId = tag.getString("oreId");
         this.purity = tag.getInt("purity");
-        System.out.println("LOADED ORE ID: " + this.oreId);
+//        System.out.println("LOADED ORE ID: " + this.oreId);
 
         // CRITICAL: If we are on the server, tell the client about this new data
         if (this.level != null && !this.level.isClientSide) {

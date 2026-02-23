@@ -61,10 +61,12 @@ public class ClientHUDHandler {
         float halfW = graphics.guiWidth() / 2F;
         float halfH = graphics.guiHeight() / 2F;
 
-        for (String sPos : data.split(",")) {
-            if (sPos.trim().isEmpty()) continue;
+        for (String entry : data.split(",")) {
+            if (entry.trim().isEmpty()) continue;
             try {
-                BlockPos nodePos = BlockPos.of(Long.parseLong(sPos));
+                // FIX: Split the complex string to get the Long ID
+                String[] parts = entry.split("\\|");
+                BlockPos nodePos = BlockPos.of(Long.parseLong(parts[0]));
 
                 // Relative world position
                 Vector4f v = new Vector4f(
@@ -74,12 +76,11 @@ public class ClientHUDHandler {
                         1F
                 );
 
-                // Dot product check to ensure node is in front of camera
-                Vec3 nodeVec = new Vec3(v.x(), v.y(), v.z()).normalize();
-                if (mc.player.getLookAngle().dot(nodeVec) > 0) {
+                // Matrix Transformation
+                syncedWorldMatrix.transform(v);
 
-                    // Step 3: Project and Scale
-                    syncedWorldMatrix.transform(v);
+                // Perspective check (prevents icons from appearing behind you)
+                if (v.w() > 0.001F) {
                     v.div(v.w()); // Perspective division
 
                     // Mapping NDC (-1 to 1) to screen pixels
@@ -88,40 +89,44 @@ public class ClientHUDHandler {
 
                     drawNodeInfo(graphics, mc, nodePos, (int)ix, (int)iy);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                // Remove 'ignored' temporarily if you need to debug further!
+            }
         }
     }
 
     private static void drawNodeInfo(GuiGraphics graphics, Minecraft mc, BlockPos pos, int x, int y) {
+        // 1. Get the BlockEntity to find out what ore this actually is
+        BlockEntity be = mc.level.getBlockEntity(pos);
+        if (!(be instanceof ResourceNodeBlockEntity nodeBE)) return;
+
+        String actualOreId = nodeBE.getOreId(); // e.g., "minecraft:iron_ore"
         BlockState state = mc.level.getBlockState(pos);
-        String blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString();
 
         // 0=Impure, 1=Normal, 2=Pure
         int purityIndex = state.hasProperty(ResourceNodeBlock.PURITY) ? state.getValue(ResourceNodeBlock.PURITY) : 1;
 
         for (SatisfactoryFTBConfig.NodeEntry node : SatisfactoryFTBConfig.scannableNodes) {
-            if (node.baseNodeId.equals(blockId)) {
+            // Compare the ID stored in the NBT, not the Master Node's block ID
+            if (node.baseNodeId.equals(actualOreId)) {
                 if (purityIndex < node.purities.size()) {
                     SatisfactoryFTBConfig.PurityEntry pEntry = node.purities.get(purityIndex);
 
-                    // 1. Get the single color defined for the entire node
+                    // Apply your color logic
                     dev.ftb.mods.ftblibrary.icon.Color4I finalColor = node.baseColor;
-
-                    // 2. Apply the consistent color shifting logic
-                    // Pure: Mix base with 30% White | Impure: Mix base with 30% Black
                     if (purityIndex == 2) {
                         finalColor = finalColor.lerp(dev.ftb.mods.ftblibrary.icon.Color4I.WHITE, 0.3f);
                     } else if (purityIndex == 0) {
                         finalColor = finalColor.lerp(dev.ftb.mods.ftblibrary.icon.Color4I.BLACK, 0.3f);
                     }
 
-                    // 3. Get display name from the visual block (e.g. Create Compacted block)
+                    // Get display name from the config-defined visual block
                     net.minecraft.resources.ResourceLocation visualLoc = net.minecraft.resources.ResourceLocation.parse(node.baseNodeId);
                     net.minecraft.world.level.block.Block visualBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(visualLoc);
                     String displayName = visualBlock.getName().getString();
 
                     int dist = (int) Math.sqrt(pos.distToCenterSqr(mc.player.position()));
-                    String text = "◆ " + displayName + " [" + pEntry.label + "] (" + dist + "m)";
+                    String text = node.hudSymbol + " " + displayName + " [" + pEntry.label + "] (" + dist + "m)";
 
                     graphics.pose().pushPose();
                     graphics.pose().translate(0, 0, 500);
@@ -138,30 +143,45 @@ public class ClientHUDHandler {
         int y = 10;
         event.getGuiGraphics().fill(centerX - 100, y, centerX + 100, y + 1, 0xFFFFFFFF);
 
-        for (String sPos : data.split(",")) {
-            if (sPos.trim().isEmpty()) continue;
-            BlockPos nodePos = BlockPos.of(Long.parseLong(sPos));
+        for (String entry : data.split(",")) {
+            if (entry.trim().isEmpty()) continue;
 
-            double angleToNode = Math.atan2(nodePos.getZ() - mc.player.getZ(), nodePos.getX() - mc.player.getX());
-            double playerAngle = Math.toRadians(mc.player.getYRot() + 90);
-            double relativeAngle = angleToNode - playerAngle;
+            try {
+                // FIX: Split the entry by the pipe symbol
+                String[] parts = entry.split("\\|");
+                if (parts.length < 1) continue;
 
-            while (relativeAngle < -Math.PI) relativeAngle += Math.PI * 2;
-            while (relativeAngle > Math.PI) relativeAngle -= Math.PI * 2;
+                // Parts[0] is the Long BlockPos
+                BlockPos nodePos = BlockPos.of(Long.parseLong(parts[0]));
 
-            if (Math.abs(relativeAngle) < Math.PI / 2) {
-                int xOffset = (int) (relativeAngle * 60);
-                String icon = "??";
-                BlockEntity be = mc.level.getBlockEntity(nodePos);
-                if (be instanceof ResourceNodeBlockEntity nodeBE) {
-                    for (SatisfactoryFTBConfig.NodeEntry node : SatisfactoryFTBConfig.scannableNodes) {
-                        if (node.baseNodeId.equals(nodeBE.getOreId())) {
-                            icon = node.hudSymbol; // Use the symbol from the config!
-                            break;
+                double angleToNode = Math.atan2(nodePos.getZ() - mc.player.getZ(), nodePos.getX() - mc.player.getX());
+                double playerAngle = Math.toRadians(mc.player.getYRot() + 90);
+                double relativeAngle = angleToNode - playerAngle;
+
+                while (relativeAngle < -Math.PI) relativeAngle += Math.PI * 2;
+                while (relativeAngle > Math.PI) relativeAngle -= Math.PI * 2;
+
+                if (Math.abs(relativeAngle) < Math.PI / 2) {
+                    int xOffset = (int) (relativeAngle * 60);
+                    String icon = "◆"; // Default icon
+
+                    // Use the Ore Name we already saved in the string (Parts[1])
+                    if (parts.length > 1) {
+                        String oreName = parts[1];
+                        for (SatisfactoryFTBConfig.NodeEntry node : SatisfactoryFTBConfig.scannableNodes) {
+                            // Check if the oreName matches a node in our config to get the HUD symbol
+                            if (node.baseNodeId.contains(oreName.toLowerCase().replace(" ", "_"))) {
+                                icon = node.hudSymbol;
+                                break;
+                            }
                         }
                     }
+
+                    event.getGuiGraphics().drawCenteredString(mc.font, icon, centerX + xOffset, y + 5, 0xFFFFFF);
                 }
-                event.getGuiGraphics().drawCenteredString(mc.font, icon, centerX + xOffset, y + 5, 0xFFFFFF);
+            } catch (Exception e) {
+                // Log and skip if a single entry is malformed to prevent a full crash
+                continue;
             }
         }
     }
