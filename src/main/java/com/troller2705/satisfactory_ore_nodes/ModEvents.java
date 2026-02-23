@@ -34,16 +34,6 @@ public class ModEvents {
                 // Cancel the break so it stays infinite
                 event.setCanceled(true);
 
-                LevelAccessor level = event.getLevel();
-                BlockPos pos = event.getPos();
-                int purity = state.getValue(ResourceNodeBlock.PURITY);
-
-                // Calculate yield based on purity (Impure=1, Normal=2, Pure=4)
-                int count = (int) Math.pow(2, purity);
-
-                // Spawn the items at the block's location
-                Block.popResource((Level) level, pos, new ItemStack(nodeBlock.getDropItem(), count));
-
                 serverLevel.sendBlockUpdated(event.getPos(), state, state, 3);
             }
         }

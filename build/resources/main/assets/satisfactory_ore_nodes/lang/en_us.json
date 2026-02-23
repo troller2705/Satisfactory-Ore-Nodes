@@ -1,11 +1,11 @@
 {
   "itemGroup.satisfactory_ore_nodes": "Ore Nodes",
-  "satisfactory_ore_nodes": "satisfactory_ore_nodes",
+  "satisfactory_ore_nodes": "Satisfactory: Ore Nodes",
   "satisfactory_ore_nodes.ui_settings": "UI Settings",
   "satisfactory_ore_nodes.ui_settings.show_hud_text": "Show HUD Text",
   "satisfactory_ore_nodes.ui_settings.show_compass": "Show Compass",
   "satisfactory_ore_nodes.scanning": "Scanning",
-  "satisfactory_ore_nodes.scanning.scannable_blocks": "Scannable Blocks",
+  "satisfactory_ore_nodes.scanning.scannable_nodes": "Scannable Nodes",
   "satisfactory_ore_nodes.scanning.scan_duration": "Scan Duration",
   "block.satisfactory_ore_nodes.iron_node": "Iron Node",
   "block.satisfactory_ore_nodes.copper_node": "Copper Node",

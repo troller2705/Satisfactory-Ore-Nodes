@@ -4,8 +4,9 @@
 	scan_duration: 60
 	nodes: [
 		{
+			symbol: "Fe"
 			color: 5636095
-			id: "satisfactory_ore_nodes:iron_node"
+			id: "minecraft:iron_ore"
 			purities: [
 				{
 					visual: "minecraft:stone"
@@ -22,11 +23,69 @@
 			]
 		}
 		{
-			color: 16755200
-			id: "satisfactory_ore_nodes:copper_node"
+			symbol: "CO"
+			color: 10066329
+			id: "minecraft:coal_ore"
 			purities: [
 				{
-					visual: "minecraft:stone"
+					visual: "minecraft:coal_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:coal_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:coal_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "DE"
+			color: 10066329
+			id: "minecraft:deepslate_coal_ore"
+			purities: [
+				{
+					visual: "minecraft:deepslate_coal_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:deepslate_coal_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:deepslate_coal_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "DE"
+			color: 10066329
+			id: "minecraft:deepslate_iron_ore"
+			purities: [
+				{
+					visual: "minecraft:deepslate_iron_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:deepslate_iron_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:deepslate_iron_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "CO"
+			color: 10066329
+			id: "minecraft:copper_ore"
+			purities: [
+				{
+					visual: "minecraft:copper_ore"
 					label: "Impure"
 				}
 				{
@@ -34,7 +93,330 @@
 					label: "Normal"
 				}
 				{
-					visual: "minecraft:raw_copper_block"
+					visual: "minecraft:copper_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "DE"
+			color: 10066329
+			id: "minecraft:deepslate_copper_ore"
+			purities: [
+				{
+					visual: "minecraft:deepslate_copper_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:deepslate_copper_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:deepslate_copper_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "GO"
+			color: 10066329
+			id: "minecraft:gold_ore"
+			purities: [
+				{
+					visual: "minecraft:gold_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:gold_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:gold_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "DE"
+			color: 10066329
+			id: "minecraft:deepslate_gold_ore"
+			purities: [
+				{
+					visual: "minecraft:deepslate_gold_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:deepslate_gold_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:deepslate_gold_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "RE"
+			color: 10066329
+			id: "minecraft:redstone_ore"
+			purities: [
+				{
+					visual: "minecraft:redstone_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:redstone_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:redstone_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "DE"
+			color: 10066329
+			id: "minecraft:deepslate_redstone_ore"
+			purities: [
+				{
+					visual: "minecraft:deepslate_redstone_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:deepslate_redstone_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:deepslate_redstone_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "EM"
+			color: 10066329
+			id: "minecraft:emerald_ore"
+			purities: [
+				{
+					visual: "minecraft:emerald_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:emerald_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:emerald_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "DE"
+			color: 10066329
+			id: "minecraft:deepslate_emerald_ore"
+			purities: [
+				{
+					visual: "minecraft:deepslate_emerald_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:deepslate_emerald_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:deepslate_emerald_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "LA"
+			color: 10066329
+			id: "minecraft:lapis_ore"
+			purities: [
+				{
+					visual: "minecraft:lapis_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:lapis_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:lapis_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "DE"
+			color: 10066329
+			id: "minecraft:deepslate_lapis_ore"
+			purities: [
+				{
+					visual: "minecraft:deepslate_lapis_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:deepslate_lapis_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:deepslate_lapis_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "DI"
+			color: 10066329
+			id: "minecraft:diamond_ore"
+			purities: [
+				{
+					visual: "minecraft:diamond_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:diamond_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:diamond_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "DE"
+			color: 10066329
+			id: "minecraft:deepslate_diamond_ore"
+			purities: [
+				{
+					visual: "minecraft:deepslate_diamond_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:deepslate_diamond_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:deepslate_diamond_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "NE"
+			color: 10066329
+			id: "minecraft:nether_gold_ore"
+			purities: [
+				{
+					visual: "minecraft:nether_gold_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:nether_gold_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:nether_gold_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "NE"
+			color: 10066329
+			id: "minecraft:nether_quartz_ore"
+			purities: [
+				{
+					visual: "minecraft:nether_quartz_ore"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:nether_quartz_ore"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:nether_quartz_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "HE"
+			color: 10066329
+			id: "minecraft:heavy_core"
+			purities: [
+				{
+					visual: "minecraft:heavy_core"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:heavy_core"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:heavy_core"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "SP"
+			color: 10066329
+			id: "minecraft:spore_blossom"
+			purities: [
+				{
+					visual: "minecraft:spore_blossom"
+					label: "Impure"
+				}
+				{
+					visual: "minecraft:spore_blossom"
+					label: "Normal"
+				}
+				{
+					visual: "minecraft:spore_blossom"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "ZI"
+			color: 10066329
+			id: "create:zinc_ore"
+			purities: [
+				{
+					visual: "create:zinc_ore"
+					label: "Impure"
+				}
+				{
+					visual: "create:zinc_ore"
+					label: "Normal"
+				}
+				{
+					visual: "create:zinc_ore"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "DE"
+			color: 10066329
+			id: "create:deepslate_zinc_ore"
+			purities: [
+				{
+					visual: "create:deepslate_zinc_ore"
+					label: "Impure"
+				}
+				{
+					visual: "create:deepslate_zinc_ore"
+					label: "Normal"
+				}
+				{
+					visual: "create:deepslate_zinc_ore"
 					label: "Pure"
 				}
 			]

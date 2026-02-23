@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -150,7 +151,16 @@ public class ClientHUDHandler {
 
             if (Math.abs(relativeAngle) < Math.PI / 2) {
                 int xOffset = (int) (relativeAngle * 60);
-                String icon = mc.level.getBlockState(nodePos).is(Satisfactory_ore_nodes.IRON_NODE.get()) ? "Fe" : "Cu";
+                String icon = "??";
+                BlockEntity be = mc.level.getBlockEntity(nodePos);
+                if (be instanceof ResourceNodeBlockEntity nodeBE) {
+                    for (SatisfactoryFTBConfig.NodeEntry node : SatisfactoryFTBConfig.scannableNodes) {
+                        if (node.baseNodeId.equals(nodeBE.getOreId())) {
+                            icon = node.hudSymbol; // Use the symbol from the config!
+                            break;
+                        }
+                    }
+                }
                 event.getGuiGraphics().drawCenteredString(mc.font, icon, centerX + xOffset, y + 5, 0xFFFFFF);
             }
         }

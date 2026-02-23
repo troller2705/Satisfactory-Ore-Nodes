@@ -4,8 +4,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -35,14 +37,12 @@ public class ResourceNodeBlock extends Block implements EntityBlock
 {
     // Define the property (0 to 2)
     public static final IntegerProperty PURITY = IntegerProperty.create("purity", 0, 2);
-    private final Item dropItem;
 
     // In ResourceNodeBlock.java
-    public ResourceNodeBlock(Properties properties, Item dropItem) {
+    public ResourceNodeBlock(Properties properties) {
         // strength(-1.0F, 3600000.0F) makes it bedrock-like (unbreakable by normal means)
         // but the BreakEvent will still fire when a player "tries" to mine it or a Drill hits it.
         super(properties.strength(2.0f, 3600000.0f));
-        this.dropItem = dropItem; // e.g., Items.RAW_COPPER
         this.registerDefaultState(this.stateDefinition.any().setValue(PURITY, 1));
     }
 
@@ -51,14 +51,22 @@ public class ResourceNodeBlock extends Block implements EntityBlock
         builder.add(PURITY);
     }
 
-    public Item getDropItem() {
-        return this.dropItem;
-    }
-
     private void handleHarvest(Level level, BlockPos pos, BlockState state, @Nullable Player player) {
-        int purity = state.getValue(PURITY);
-        int count = (int) Math.pow(2, purity);
-        ItemStack stack = new ItemStack(this.dropItem, count);
+        BlockEntity be = level.getBlockEntity(pos);
+        if (!(be instanceof ResourceNodeBlockEntity nodeBE)) return;
+
+        String oreId = nodeBE.getOreId();
+
+        // Use the Registry to find the block, then get its item
+        Block oreBlock = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(oreId));
+        Item drop = oreBlock.asItem();
+
+        // If it's a block like 'Deepslate Iron Ore', it might drop 'Raw Iron'
+        // This logic gets the standard drop for that block
+        if (drop == Items.AIR) drop = Items.RAW_IRON;
+
+        int count = (int) Math.pow(2, state.getValue(PURITY));
+        ItemStack stack = new ItemStack(drop, count);
 
         if (player != null) {
             Block.popResource(level, pos, stack);
@@ -117,20 +125,21 @@ public class ResourceNodeBlock extends Block implements EntityBlock
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
-        ItemStack stack = super.getCloneItemStack(state, target, level, pos, player);
-        int purity = state.getValue(PURITY);
+        ItemStack stack = new ItemStack(this);
+        BlockEntity be = level.getBlockEntity(pos);
 
-        // 1. Set the Display Name
-        String purityName = purity == 0 ? "Impure" : (purity == 2 ? "Pure" : "Normal");
-        stack.set(DataComponents.CUSTOM_NAME, Component.literal(purityName + " " + this.getName().getString())
-                .withStyle(purity == 2 ? ChatFormatting.AQUA : ChatFormatting.GRAY));
+        if (be instanceof ResourceNodeBlockEntity nodeBE) {
+            CompoundTag tag = new CompoundTag();
+            tag.putString("oreId", nodeBE.getOreId());
+            tag.putInt("purity", state.getValue(PURITY));
 
-        // 2. Fix: Create the tag separately
-        CompoundTag tag = new CompoundTag();
-        tag.putInt("purity", purity);
+            BlockItem.setBlockEntityData(stack, Satisfactory_ore_nodes.NODE_BE.get(), tag);
 
-        // 3. Apply the tag to the BlockItem's data
-        BlockItem.setBlockEntityData(stack, Satisfactory_ore_nodes.NODE_BE.get(), tag);
+            // Dynamic Name for the item in your hand
+            String oreName = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(nodeBE.getOreId()))
+                    .getName().getString();
+            stack.set(DataComponents.CUSTOM_NAME, Component.literal(oreName + " Node"));
+        }
 
         return stack;
     }
@@ -138,16 +147,20 @@ public class ResourceNodeBlock extends Block implements EntityBlock
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        // When placed from a stack that has NBT data, update the block state
         if (!level.isClientSide) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof ResourceNodeBlockEntity nodeBE) {
-                // If the item had a "purity" tag, update the block
-                CompoundTag tag = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).copyTag();
-                if (tag.contains("purity")) {
-                    int p = tag.getInt("purity");
-                    level.setBlock(pos, state.setValue(PURITY, p), 3);
-                }
+                CustomData data = stack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+
+                // This pulls the NBT from the item directly into the BE's loadAdditional method
+                data.loadInto(nodeBE, level.registryAccess());
+
+                // Sync the BlockState property with the NBT value
+                int p = nodeBE.getPurity();
+                level.setBlock(pos, state.setValue(PURITY, p), 3);
+
+                nodeBE.setChanged();
+                level.sendBlockUpdated(pos, state, state, 3);
             }
         }
     }

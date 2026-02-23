@@ -1,9 +1,0 @@
-["UI Settings"]
-	#Show the 3D floating text over nodes
-	showHudText = true
-	#Show the compass at the top of the screen
-	showCompass = true
-	#How long the scan results stay visible (in seconds)
-	# Default: 60
-	# Range: 5 ~ 300
-	scanDuration = 60

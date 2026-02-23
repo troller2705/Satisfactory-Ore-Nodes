@@ -1,12 +1,17 @@
 package com.troller2705.satisfactory_ore_nodes;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -46,27 +51,18 @@ public class Satisfactory_ore_nodes {
     // --- REGISTRATION ---
 
     // 1. The Resource Node Block
-    public static final DeferredBlock<ResourceNodeBlock> IRON_NODE = BLOCKS.register("iron_node",
+    public static final DeferredBlock<ResourceNodeBlock> MASTER_NODE = BLOCKS.register("resource_node",
             () -> new ResourceNodeBlock(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.METAL)
-                    .strength(2.0f, 3600000.0f) // Hard to mine, but not bedrock-impossible
-                    .requiresCorrectToolForDrops(), Items.RAW_IRON));
+                    .mapColor(MapColor.STONE)
+                    .strength(2.0f, 3600000.0f)
+                    .noOcclusion() // Important for dynamic rendering
+                    .requiresCorrectToolForDrops()));
 
-    public static final DeferredBlock<ResourceNodeBlock> COPPER_NODE = BLOCKS.register("copper_node",
-            () -> new ResourceNodeBlock(BlockBehaviour.Properties.of()
-                    .mapColor(MapColor.METAL)
-                    .strength(2.0f, 3600000.0f) // Hard to mine, but not bedrock-impossible
-                    .requiresCorrectToolForDrops(), Items.RAW_COPPER));
-
-    // Register the Block Entity and link it to your Iron Node block
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ResourceNodeBlockEntity>> NODE_BE =
             BLOCK_ENTITY_TYPES.register("node_be", () ->
-                    BlockEntityType.Builder.of(ResourceNodeBlockEntity::new, IRON_NODE.get(), COPPER_NODE.get()).build(null));
+                    BlockEntityType.Builder.of(ResourceNodeBlockEntity::new, MASTER_NODE.get()).build(null));
 
-    // 2. The BlockItem so we can hold the node
-    public static final DeferredItem<BlockItem> IRON_NODE_ITEM = ITEMS.registerSimpleBlockItem("iron_node", IRON_NODE);
-
-    public static final DeferredItem<BlockItem> COPPER_NODE_ITEM = ITEMS.registerSimpleBlockItem("copper_node", COPPER_NODE);
+    public static final DeferredItem<BlockItem> MASTER_NODE_ITEM = ITEMS.registerSimpleBlockItem("resource_node", MASTER_NODE);
 
     // 3. The Scanner Item
     public static final DeferredItem<Item> NODE_SCANNER = ITEMS.register("node_scanner",
@@ -76,17 +72,37 @@ public class Satisfactory_ore_nodes {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> SATISFACTORY_TAB = CREATIVE_MODE_TABS.register("satisfactory_tab",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.satisfactory_ore_nodes"))
-                    .icon(() -> IRON_NODE_ITEM.get().getDefaultInstance())
+                    .icon(() -> MASTER_NODE_ITEM.get().getDefaultInstance())
                     .displayItems((parameters, output) -> {
-                        output.accept(IRON_NODE_ITEM.get());
-                        output.accept(COPPER_NODE_ITEM.get());
+                        // 1. Add the Scanner
                         output.accept(NODE_SCANNER.get());
+
+                        // 2. Add a dynamic node for every ore in your config
+                        for (SatisfactoryFTBConfig.NodeEntry node : SatisfactoryFTBConfig.scannableNodes) {
+                            ItemStack stack = new ItemStack(MASTER_NODE_ITEM.get());
+
+                            CompoundTag blockDataTag = new CompoundTag();
+                            // Must include the ID of your Block Entity
+                            blockDataTag.putString("id", "satisfactory_ore_nodes:node_be");
+                            blockDataTag.putString("oreId", node.baseNodeId);
+                            blockDataTag.putInt("purity", 1);
+
+                            // FIX: Wrap the tag in CustomData and apply to the component
+                            stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(blockDataTag));
+
+                            // Name the item
+                            String oreName = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(node.baseNodeId))
+                                    .getName().getString();
+                            stack.set(DataComponents.CUSTOM_NAME, Component.literal(oreName + " Node")
+                                    .withStyle(ChatFormatting.GOLD));
+
+                            output.accept(stack);
+                        }
                     }).build());
 
     public Satisfactory_ore_nodes(IEventBus modEventBus, ModContainer modContainer) {
         // Register FTB Library as the Config UI provider
         if (Dist.CLIENT.isClient()) {
-            SatisfactoryFTBConfig.load(); // Load the .snbt file
             modContainer.registerExtensionPoint(IConfigScreenFactory.class,
                     (mc, parent) -> {
                         SatisfactoryFTBConfig.openGui();
@@ -100,7 +116,9 @@ public class Satisfactory_ore_nodes {
         CREATIVE_MODE_TABS.register(modEventBus);
         BLOCK_ENTITY_TYPES.register(modEventBus);
 
+        modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::buildContents);
 
 
         // This is important: NeoForge.EVENT_BUS is for GAME events (like your BreakEvent)
@@ -110,5 +128,27 @@ public class Satisfactory_ore_nodes {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Satisfactory Nodes Initializing...");
+    }
+
+    private void clientSetup(final FMLClientSetupEvent event) {
+        event.enqueueWork(() -> {
+            // Load the file first so we don't overwrite existing user colors
+            SatisfactoryFTBConfig.load();
+
+            // NOW run discovery when tags are ready
+            SatisfactoryFTBConfig.autoDiscoverOres();
+
+            LOGGER.info("Satisfactory Nodes: Discovery complete. Found {} nodes.",
+                    SatisfactoryFTBConfig.scannableNodes.size());
+        });
+    }
+
+    private void buildContents(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == SATISFACTORY_TAB.getKey()) {
+            // Run discovery right as the tab is being opened for the first time
+            if (SatisfactoryFTBConfig.scannableNodes.size() <= 1) { // 1 is your default Iron Node
+                SatisfactoryFTBConfig.autoDiscoverOres();
+            }
+        }
     }
 }
