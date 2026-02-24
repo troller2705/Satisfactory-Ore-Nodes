@@ -9,7 +9,7 @@
 			id: "minecraft:iron_ore"
 			purities: [
 				{
-					visual: "minecraft:stone"
+					visual: "minecraft:iron_ore"
 					label: "Impure"
 				}
 				{
@@ -17,7 +17,7 @@
 					label: "Normal"
 				}
 				{
-					visual: "minecraft:raw_iron_block"
+					visual: "minecraft:iron_ore"
 					label: "Pure"
 				}
 			]

@@ -2,6 +2,7 @@ package com.troller2705.satisfactory_ore_nodes;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -31,6 +32,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
@@ -39,19 +41,18 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.*;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(Satisfactory_ore_nodes.MODID)
-public class Satisfactory_ore_nodes {
+public class Satisfactory_ore_nodes
+{
     public static final String MODID = "satisfactory_ore_nodes";
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -75,24 +76,8 @@ public class Satisfactory_ore_nodes {
                     BlockEntityType.Builder.of(ResourceNodeBlockEntity::new, MASTER_NODE.get()).build(null));
 
     // 2. The Resource Node Item
-    // Replace your single MASTER_NODE_ITEM registration with a dynamic map
-    public static final Map<String, DeferredItem<BlockItem>> NODE_ITEMS = new HashMap<>();
-
-    public static void registerDynamicItems(DeferredRegister.Items items) {
-        for (int i = 0; i < SatisfactoryFTBConfig.scannableNodes.size(); i++) {
-            SatisfactoryFTBConfig.NodeEntry node = SatisfactoryFTBConfig.scannableNodes.get(i);
-            for (int p = 0; p <= 2; p++) {
-                String purityName = (p == 0) ? "impure_" : (p == 2) ? "pure_" : "normal_";
-                String registryName = purityName + node.baseNodeId.replace(":", "_") + "_node";
-
-                int finalP = p;
-                int finalI = i;
-
-                NODE_ITEMS.put(registryName, items.register(registryName,
-                        () -> new DynamicNodeItem(MASTER_NODE.get(), new Item.Properties(), node.baseNodeId, finalP, finalI)));
-            }
-        }
-    }
+    public static final DeferredItem<BlockItem> MASTER_NODE_ITEM = ITEMS.register("resource_node",
+            () -> new BlockItem(MASTER_NODE.get(), new Item.Properties()));
 
     // 3. The Scanner Item
     public static final DeferredItem<Item> NODE_SCANNER = ITEMS.register("node_scanner",
@@ -102,21 +87,38 @@ public class Satisfactory_ore_nodes {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> SATISFACTORY_TAB = CREATIVE_MODE_TABS.register("satisfactory_tab",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.satisfactory_ore_nodes"))
-                    // Set the overall Tab Icon (e.g., the Iron Node)
-                    .icon(() -> {
-                        return new ItemStack(Items.IRON_ORE);
-                    })
-                    // Inside your Creative Tab registration
+                    .icon(() -> new ItemStack(Items.IRON_ORE))
                     .displayItems((parameters, output) -> {
-                        output.accept(NODE_SCANNER);
-                        NODE_ITEMS.values().forEach(item -> output.accept(item.get()));
+                        // Always use .get() for Deferred objects
+                        output.accept(NODE_SCANNER.get());
+                        output.accept(MASTER_NODE_ITEM.get());
+
+                        // Since we are using the "original items" approach,
+                        // add common ores here so players have them for configuration
+                        output.accept(Items.RAW_IRON);
+                        output.accept(Items.RAW_COPPER);
+                        output.accept(Items.RAW_GOLD);
+                        output.accept(Items.COAL);
                     }).build());
 
-    public Satisfactory_ore_nodes(IEventBus modEventBus, ModContainer modContainer) {
+    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
+            DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, MODID);
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<List<String>>> UNLOCKED_ORES =
+            ATTACHMENT_TYPES.register("unlocked_ores",
+                    () -> AttachmentType.builder(() -> (List<String>) new ArrayList<String>())
+                            .serialize(Codec.list(Codec.STRING))
+                            .copyOnDeath()
+                            .build());
+
+    public Satisfactory_ore_nodes(IEventBus modEventBus, ModContainer modContainer)
+    {
         // Register FTB Library as the Config UI provider
-        if (Dist.CLIENT.isClient()) {
+        if (Dist.CLIENT.isClient())
+        {
             modContainer.registerExtensionPoint(IConfigScreenFactory.class,
-                    (mc, parent) -> {
+                    (mc, parent) ->
+                    {
                         SatisfactoryFTBConfig.openGui();
                         return null; // FTB opens its own screen immediately
                     });
@@ -124,13 +126,13 @@ public class Satisfactory_ore_nodes {
 
         SatisfactoryFTBConfig.load();
 
-        registerDynamicItems(ITEMS);
 
         // Register our registers to the event bus
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         BLOCK_ENTITY_TYPES.register(modEventBus);
+        ATTACHMENT_TYPES.register(modEventBus);
 
         modEventBus.addListener(this::registerRenderers);
         modEventBus.addListener(this::clientSetup);
@@ -143,12 +145,15 @@ public class Satisfactory_ore_nodes {
         NeoForge.EVENT_BUS.register(ModEvents.class);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {
+    private void commonSetup(final FMLCommonSetupEvent event)
+    {
         LOGGER.info("Satisfactory Nodes Initializing...");
     }
 
-    private void clientSetup(final FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
+    private void clientSetup(final FMLClientSetupEvent event)
+    {
+        event.enqueueWork(() ->
+        {
 
             // NOW run discovery when tags are ready
             SatisfactoryFTBConfig.autoDiscoverOres();
@@ -158,24 +163,20 @@ public class Satisfactory_ore_nodes {
         });
     }
 
-    private void buildContents(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == SATISFACTORY_TAB.getKey()) {
+    private void buildContents(BuildCreativeModeTabContentsEvent event)
+    {
+        if (event.getTabKey() == SATISFACTORY_TAB.getKey())
+        {
             // Run discovery right as the tab is being opened for the first time
-            if (SatisfactoryFTBConfig.scannableNodes.size() <= 1) { // 1 is your default Iron Node
+            if (SatisfactoryFTBConfig.scannableNodes.size() <= 1)
+            { // 1 is your default Iron Node
                 SatisfactoryFTBConfig.autoDiscoverOres();
             }
         }
     }
 
-    private void registerRenderers(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) {
+    private void registerRenderers(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event)
+    {
         event.registerBlockEntityRenderer(NODE_BE.get(), ResourceNodeRenderer::new);
-    }
-
-    @SubscribeEvent
-    public static void onModelRegister(ModelEvent.RegisterAdditional event) {
-        // Tell Minecraft to load the master node model for ALL our dynamic items
-        for (String registryName : NODE_ITEMS.keySet()) {
-            event.register(ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(MODID, "item/" + registryName)));
-        }
     }
 }

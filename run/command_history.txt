@@ -11,3 +11,14 @@
 /setblock ~ ~ ~ satisfactory_ore_nodes:copper_node[purity=2]
 /setblock ~ ~ ~ satisfactory_ore_nodes:resource_node[purity=2]
 /setblock ~ ~ ~ satisfactory_ore_nodes:resource_node[purity=2,ore_index=0]
+/nodes unlock iron
+/nodes unlock iron_ore
+/nodes unlock iron
+/nodes unlock raw_iron
+/nodes
+/nodes unlock
+/nodes unlock iron
+/nodes unlock Iron
+/nodes unlock minecraft:coal_ore
+/nodes unlock minecraft:iron_ore
+/nodes unlock minecraft:coal_ore

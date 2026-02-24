@@ -10,6 +10,8 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -27,6 +29,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -46,6 +49,42 @@ public class ResourceNodeBlock extends Block implements EntityBlock
         // but the BreakEvent will still fire when a player "tries" to mine it or a Drill hits it.
         super(properties.strength(2.0f, 6.0f));
         this.registerDefaultState(this.stateDefinition.any().setValue(PURITY, 1).setValue(ORE_INDEX, 0));
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
+
+        if (!stack.isEmpty() && !level.isClientSide && level.getBlockEntity(pos) instanceof ResourceNodeBlockEntity nodeBE) {
+            // Get the item's name (e.g., "minecraft:raw_iron" or "create:copper_ore")
+            String heldItemPath = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+
+            // Standardize the name by stripping common prefixes/suffixes
+            String materialKey = heldItemPath.replace("raw_", "").replace("_ore", "").replace("_ingot", "");
+
+            for (int i = 0; i < SatisfactoryFTBConfig.scannableNodes.size(); i++) {
+                var nodeEntry = SatisfactoryFTBConfig.scannableNodes.get(i);
+                String configBaseName = ResourceLocation.parse(nodeEntry.baseNodeId).getPath().replace("_ore", "");
+
+                // If the item in hand matches a material in your config
+                if (materialKey.equals(configBaseName) || heldItemPath.contains(configBaseName)) {
+
+                    // Cycle purity: 0 (Impure) -> 1 (Normal) -> 2 (Pure)
+                    int nextPurity = (state.getValue(PURITY) + 1) % 3;
+
+                    // Sync the BlockEntity and BlockState
+                    nodeBE.setOreId(nodeEntry.baseNodeId);
+                    nodeBE.setPurity(nextPurity);
+                    level.setBlock(pos, state.setValue(PURITY, nextPurity).setValue(ORE_INDEX, i), 3);
+
+                    player.displayClientMessage(Component.literal("Configured: " + nodeEntry.hudSymbol + " [" + nextPurity + "]")
+                            .withStyle(ChatFormatting.GREEN), true);
+
+                    return InteractionResult.SUCCESS;
+                }
+            }
+        }
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -80,6 +119,7 @@ public class ResourceNodeBlock extends Block implements EntityBlock
             if (oreId.contains("iron")) drop = Items.RAW_IRON;
             else if (oreId.contains("copper")) drop = Items.RAW_COPPER;
             else if (oreId.contains("gold")) drop = Items.RAW_GOLD;
+            else if (oreId.contains("coal")) drop = Items.COAL;
             else if (oreId.contains("uranium")) drop = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("create", "raw_uranium"));
         }
 
@@ -166,15 +206,13 @@ public class ResourceNodeBlock extends Block implements EntityBlock
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
 
-        // Use the baked-in identity of the new DynamicNodeItem class
-        if (!level.isClientSide && stack.getItem() instanceof DynamicNodeItem nodeItem) {
-            if (level.getBlockEntity(pos) instanceof ResourceNodeBlockEntity nodeBE) {
-                nodeBE.setOreId(nodeItem.getOreId());
-                nodeBE.setPurity(nodeItem.getPurity());
-
-                // Update BlockState so F3 and Renderer show the right thing immediately
-                level.setBlock(pos, state.setValue(PURITY, nodeItem.getPurity())
-                        .setValue(ORE_INDEX, nodeItem.getOreIndex()), 3);
+        // Nodes now start as "Blank" or "Iron" by default until configured by right-clicking with an ore
+        if (!level.isClientSide && level.getBlockEntity(pos) instanceof ResourceNodeBlockEntity nodeBE) {
+            // Optional: Initialize with a default from your config
+            if (!SatisfactoryFTBConfig.scannableNodes.isEmpty()) {
+                var defaultNode = SatisfactoryFTBConfig.scannableNodes.get(0);
+                nodeBE.setOreId(defaultNode.baseNodeId);
+                level.setBlock(pos, state.setValue(PURITY, 1).setValue(ORE_INDEX, 0), 3);
             }
         }
     }

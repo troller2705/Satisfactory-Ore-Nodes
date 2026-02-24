@@ -151,9 +151,9 @@ public class SatisfactoryFTBConfig
 
     public static List<NodeEntry> scannableNodes = new ArrayList<>(List.of(
             new NodeEntry("satisfactory_ore_nodes:iron_node", "Fe", Color4I.rgb(0x55FFFF), new ArrayList<>(List.of(
-                    new PurityEntry("Impure", "minecraft:stone"),
+                    new PurityEntry("Impure", "minecraft:iron_ore"),
                     new PurityEntry("Normal", "minecraft:iron_ore"),
-                    new PurityEntry("Pure", "minecraft:raw_iron_block")
+                    new PurityEntry("Pure", "minecraft:iron_ore")
             )))
     ));
 
