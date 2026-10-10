@@ -1,0 +1,6 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "satisfactory_ore_nodes:item/ficsit_extractor"
+  }
+}

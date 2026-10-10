@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "satisfactory_ore_nodes:item/node_scanner"
+  }
+}

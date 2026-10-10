@@ -83,6 +83,9 @@ public class Satisfactory_ore_nodes
     public static final DeferredItem<Item> NODE_SCANNER = ITEMS.register("node_scanner",
             () -> new NodeScannerItem(new Item.Properties()));
 
+    public static final DeferredItem<Item> EXTRACTOR_ITEM = ITEMS.register("extractor",
+            FicsitExtractorItem::new);
+
     // 4. Creative Tab
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> SATISFACTORY_TAB = CREATIVE_MODE_TABS.register("satisfactory_tab",
             () -> CreativeModeTab.builder()
@@ -91,14 +94,8 @@ public class Satisfactory_ore_nodes
                     .displayItems((parameters, output) -> {
                         // Always use .get() for Deferred objects
                         output.accept(NODE_SCANNER.get());
+                        output.accept(EXTRACTOR_ITEM.get());
                         output.accept(MASTER_NODE_ITEM.get());
-
-                        // Since we are using the "original items" approach,
-                        // add common ores here so players have them for configuration
-                        output.accept(Items.RAW_IRON);
-                        output.accept(Items.RAW_COPPER);
-                        output.accept(Items.RAW_GOLD);
-                        output.accept(Items.COAL);
                     }).build());
 
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
@@ -178,5 +175,14 @@ public class Satisfactory_ore_nodes
     private void registerRenderers(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event)
     {
         event.registerBlockEntityRenderer(NODE_BE.get(), ResourceNodeRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void registerPackets(final net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) {
+        event.registrar("satisfactory_ore_nodes")
+                // The Client telling the Server what they clicked
+                .playToServer(ScannerSelectPacket.TYPE, ScannerSelectPacket.STREAM_CODEC, ScannerSelectPacket::handle)
+                // The Server telling the Client to open the menu with the unlocked data
+                .playToClient(OpenScannerMenuPacket.TYPE, OpenScannerMenuPacket.STREAM_CODEC, OpenScannerMenuPacket::handle);
     }
 }

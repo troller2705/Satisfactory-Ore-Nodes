@@ -93,7 +93,7 @@
 					label: "Normal"
 				}
 				{
-					visual: "minecraft:copper_ore"
+					visual: "minecraft:copper_block"
 					label: "Pure"
 				}
 			]

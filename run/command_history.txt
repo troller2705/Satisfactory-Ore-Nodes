@@ -22,3 +22,14 @@
 /nodes unlock minecraft:coal_ore
 /nodes unlock minecraft:iron_ore
 /nodes unlock minecraft:coal_ore
+/nodes unlock copper
+/nodes unlock copper_ore
+/reload
+/time set noon
+/gamerule doDaylightCycle false
+/gamerule doWeatherCycle false
+/nodes unlock iron_ore
+/nodes unlock iron
+/nodes unlock iron_ore
+/nodes unlock diamond_ore
+/nodes lock diamond_ore
