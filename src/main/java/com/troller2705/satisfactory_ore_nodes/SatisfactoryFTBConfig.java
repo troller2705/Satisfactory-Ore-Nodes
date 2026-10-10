@@ -18,20 +18,95 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 
 import java.nio.file.Path;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SatisfactoryFTBConfig
 {
-
-    // This defines the common "c:ores" tag used by almost all mods in 1.21.1
+    // Common "c:ores" tag
     public static final TagKey<Block> C_ORES = TagKey.create(
             Registries.BLOCK,
             ResourceLocation.fromNamespaceAndPath("c", "ores")
     );
 
     private static final Path CONFIG_FILE = Minecraft.getInstance().gameDirectory.toPath().resolve("config/satisfactory_nodes.snbt");
+
+    // Periodic Table Symbol Dictionary
+    private static final Map<String, String> ELEMENT_SYMBOLS = Map.ofEntries(
+            Map.entry("iron", "Fe"),
+            Map.entry("gold", "Au"),
+            Map.entry("copper", "Cu"),
+            Map.entry("tin", "Sn"),
+            Map.entry("lead", "Pb"),
+            Map.entry("silver", "Ag"),
+            Map.entry("nickel", "Ni"),
+            Map.entry("platinum", "Pt"),
+            Map.entry("zinc", "Zn"),
+            Map.entry("aluminum", "Al"),
+            Map.entry("aluminium", "Al"),
+            Map.entry("bauxite", "Al"),
+            Map.entry("uranium", "U"),
+            Map.entry("osmium", "Os"),
+            Map.entry("titanium", "Ti"),
+            Map.entry("tungsten", "W"),
+            Map.entry("lithium", "Li"),
+            Map.entry("cobalt", "Co"),
+            Map.entry("iridium", "Ir"),
+            // Non-Metals & Satisfactory Specials
+            Map.entry("coal", "C"),
+            Map.entry("diamond", "C"),
+            Map.entry("emerald", "Em"),
+            Map.entry("lapis", "Lp"),
+            Map.entry("redstone", "Rs"),
+            Map.entry("quartz", "Qz"),
+            Map.entry("sulfur", "S"),
+            Map.entry("sam", "SAM"),
+            Map.entry("limestone", "Ls"),
+            Map.entry("caterium", "Ct"),
+            // Fluids / Gases
+            Map.entry("water", "H2O"),
+            Map.entry("nitrogen", "N"),
+            Map.entry("oil", "Oil"),
+            Map.entry("crude_oil", "Oil")
+    );
+
+    // Periodic Table Color Dictionary (Hex 0xRRGGBB)
+    private static final Map<String, Integer> ELEMENT_COLORS = Map.ofEntries(
+            Map.entry("iron", 0xD8AF93),       // Minecraft Iron Tan/Grey
+            Map.entry("gold", 0xFDF55F),       // Yellow Gold
+            Map.entry("copper", 0xE77C56),     // Orange Copper
+            Map.entry("tin", 0x9CB4B8),        // Light Blueish-Grey
+            Map.entry("lead", 0x4D4D4F),       // Dark Grey
+            Map.entry("silver", 0xC0C0C0),     // Silver
+            Map.entry("nickel", 0xE8E8B7),     // Pale Yellow-Grey
+            Map.entry("platinum", 0xA3C2C2),   // Cyan-Grey
+            Map.entry("zinc", 0xA5B79C),       // Pale Green-Grey
+            Map.entry("aluminum", 0xCDD6DD),   // Light Blue-Grey
+            Map.entry("aluminium", 0xCDD6DD),  // Light Blue-Grey
+            Map.entry("bauxite", 0xCC7B70),    // Satisfactory Bauxite Pink/Salmon
+            Map.entry("uranium", 0x39FF14),    // Neon Green
+            Map.entry("osmium", 0x7A8EA3),     // Slate Blue
+            Map.entry("titanium", 0xE0E0E0),   // White-Grey
+            Map.entry("tungsten", 0x303030),   // Very Dark Grey
+            Map.entry("lithium", 0xE6E6E6),    // White
+            Map.entry("cobalt", 0x0047AB),     // Cobalt Blue
+            Map.entry("iridium", 0xE6E6E6),    // White-Grey
+            Map.entry("coal", 0x2A2A2A),       // Dark Grey/Black
+            Map.entry("diamond", 0x4AEDE0),    // Cyan
+            Map.entry("emerald", 0x41F384),    // Emerald Green
+            Map.entry("lapis", 0x27438A),      // Deep Blue
+            Map.entry("redstone", 0xFF0000),   // Bright Red
+            Map.entry("quartz", 0xE8E4DE),     // Off-White
+            Map.entry("sulfur", 0xE2E034),     // Sulfur Yellow
+            Map.entry("sam", 0x981AE8),        // Strange Alien Purple
+            Map.entry("limestone", 0xD3D3CB),  // Pale Tan/Grey
+            Map.entry("caterium", 0xF0D24D),   // Bright Gold
+            Map.entry("water", 0x3498DB),      // Liquid Blue
+            Map.entry("nitrogen", 0x00FFFF),   // Cyan Gas
+            Map.entry("oil", 0x111111),        // Pitch Black
+            Map.entry("crude_oil", 0x111111)   // Pitch Black
+    );
 
     public static void save()
     {
@@ -102,7 +177,6 @@ public class SatisfactoryFTBConfig
             this.visualBlockId = visualBlockId;
         }
 
-        // Fix: Ensures a fresh instance is created for every new list entry
         public PurityEntry copy()
         {
             return new PurityEntry(this.label, this.visualBlockId);
@@ -118,7 +192,7 @@ public class SatisfactoryFTBConfig
     public static class NodeEntry
     {
         public String baseNodeId;
-        public String hudSymbol; // New Field: e.g., "Fe"
+        public String hudSymbol;
         public Color4I baseColor;
         public List<PurityEntry> purities;
 
@@ -130,7 +204,6 @@ public class SatisfactoryFTBConfig
             this.purities = purities;
         }
 
-        // Fix: Deep copy ensures purities lists aren't shared between nodes
         public NodeEntry copy()
         {
             List<PurityEntry> pCopy = new ArrayList<>();
@@ -149,13 +222,8 @@ public class SatisfactoryFTBConfig
     public static boolean showCompass = true;
     public static int scanDuration = 60;
 
-    public static List<NodeEntry> scannableNodes = new ArrayList<>(List.of(
-            new NodeEntry("satisfactory_ore_nodes:iron_node", "Fe", Color4I.rgb(0x55FFFF), new ArrayList<>(List.of(
-                    new PurityEntry("Impure", "minecraft:iron_ore"),
-                    new PurityEntry("Normal", "minecraft:iron_ore"),
-                    new PurityEntry("Pure", "minecraft:iron_ore")
-            )))
-    ));
+    // This ensures Iron has its correct default symbol and color upon fresh install
+    public static List<NodeEntry> scannableNodes = new ArrayList<>();
 
     public static void openGui()
     {
@@ -164,7 +232,7 @@ public class SatisfactoryFTBConfig
         {
             if (accepted)
             {
-                save(); // Persistent save to satisfactory_nodes.snbt
+                save();
             }
             mc.setScreen(null);
         });
@@ -181,14 +249,13 @@ public class SatisfactoryFTBConfig
             @Override
             public void onClicked(Widget widget, MouseButton button, ConfigCallback callback)
             {
-                // We create a CLONE for editing so we don't touch the original until accepted
                 final NodeEntry editingNode = value.copy();
                 ConfigGroup entryGroup = new ConfigGroup("edit_node", (accepted) ->
                 {
                     if (accepted)
                     {
-                        // Apply the changes back to the actual object in the list
                         value.baseNodeId = editingNode.baseNodeId;
+                        value.hudSymbol = editingNode.hudSymbol; // Added Symbol Editing Support to GUI!
                         value.baseColor = editingNode.baseColor;
                         value.purities = editingNode.purities;
                         callback.save(true);
@@ -196,15 +263,14 @@ public class SatisfactoryFTBConfig
                 });
 
                 entryGroup.addString("node_block_id", editingNode.baseNodeId, s -> editingNode.baseNodeId = s, "");
+                entryGroup.addString("hud_symbol", editingNode.hudSymbol, s -> editingNode.hudSymbol = s, "??");
                 entryGroup.add("base_node_color", new ColorConfig(), editingNode.baseColor, c -> editingNode.baseColor = c, Color4I.WHITE);
 
-                // Nested Purity Editor
                 entryGroup.addList("purity_settings", editingNode.purities, new ConfigValue<PurityEntry>()
                 {
                     @Override
                     public void onClicked(Widget w, MouseButton b, ConfigCallback cb)
                     {
-                        // Again, create a LOCAL copy for this specific purity row
                         final PurityEntry editingPurity = value.copy();
                         ConfigGroup pGroup = new ConfigGroup("edit_purity", (pAccepted) ->
                         {
@@ -235,26 +301,35 @@ public class SatisfactoryFTBConfig
         var blockRegistry = BuiltInRegistries.BLOCK;
 
         itemRegistry.holders().forEach(holder -> {
-            // Check for "ore" in the name if tags are failing us
             String path = holder.key().location().getPath();
             String namespace = holder.key().location().getNamespace();
 
-            // Filter: Must have "ore" in the name and NOT be from our own mod
-            if (path.contains("ore") && !namespace.equals(Satisfactory_ore_nodes.MODID)) {
+            // Filter: Must have "ore", NOT be from our mod, and NOT be a deepslate variant
+            if (path.contains("ore") && !namespace.equals(Satisfactory_ore_nodes.MODID) && !path.contains("deepslate")) {
                 ResourceLocation loc = holder.key().location();
                 String oreId = loc.toString();
 
-                // Make sure this item actually has a block associated with it
                 if (!blockRegistry.containsKey(loc)) return;
-
-                // Skip if already configured
                 if (scannableNodes.stream().anyMatch(n -> n.baseNodeId.equals(oreId))) return;
 
-                // Guess Symbol (e.g., "tin_ore" -> "TI")
-                String guessedSymbol = path.substring(0, Math.min(path.length(), 2)).toUpperCase();
+                // Extract base material name (e.g., "iron_ore" -> "iron")
+                String simpleName = path.replace("_ore", "").replace("ore_", "");
+
+                // Retrieve exact symbol from dictionary, OR generate a formatted fallback
+                String symbol;
+                if (ELEMENT_SYMBOLS.containsKey(simpleName)) {
+                    // Uses exact casing from our dictionary so SAM and H2O stay correct
+                    symbol = ELEMENT_SYMBOLS.get(simpleName);
+                } else {
+                    // Fallback to auto-guessing the first 2 letters and formatting them (e.g. "Ti")
+                    String guessed = simpleName.substring(0, Math.min(simpleName.length(), 2));
+                    symbol = guessed.substring(0, 1).toUpperCase() + guessed.substring(1).toLowerCase();
+                }
+
+                // Retrieve assigned color, or default to generic grey
+                int colorHex = ELEMENT_COLORS.getOrDefault(simpleName, 0xAAAAAA);
 
                 // Create: Compacted Logic
-                String simpleName = path.replace("_ore", "").replace("ore_", "");
                 ResourceLocation compactLoc = ResourceLocation.fromNamespaceAndPath("create_compacted", "compact_" + simpleName);
                 String compactId = blockRegistry.containsKey(compactLoc) ? compactLoc.toString() : oreId;
 
@@ -264,7 +339,7 @@ public class SatisfactoryFTBConfig
                         new PurityEntry("Pure", compactId)
                 ));
 
-                scannableNodes.add(new NodeEntry(oreId, guessedSymbol, Color4I.GRAY, autoPurities));
+                scannableNodes.add(new NodeEntry(oreId, symbol, Color4I.rgb(colorHex), autoPurities));
             }
         });
         save();
