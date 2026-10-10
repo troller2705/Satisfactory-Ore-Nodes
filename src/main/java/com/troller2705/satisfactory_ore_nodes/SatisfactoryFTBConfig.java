@@ -305,7 +305,7 @@ public class SatisfactoryFTBConfig
             String namespace = holder.key().location().getNamespace();
 
             // Filter: Must have "ore", NOT be from our mod, and NOT be a deepslate variant
-            if (path.contains("ore") && !namespace.equals(Satisfactory_ore_nodes.MODID) && !path.contains("deepslate")) {
+            if ((path.contains("ore") || path.contains("limestone")) && !namespace.equals(Satisfactory_ore_nodes.MODID) && !path.contains("deepslate")) {
                 ResourceLocation loc = holder.key().location();
                 String oreId = loc.toString();
 
