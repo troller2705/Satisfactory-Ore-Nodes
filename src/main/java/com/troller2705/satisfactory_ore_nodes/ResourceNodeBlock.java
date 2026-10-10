@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.level.material.FluidState;
@@ -72,7 +73,7 @@ public class ResourceNodeBlock extends Block implements EntityBlock {
 
                 if (!level.isClientSide) {
                     // Get the drops
-                    ItemStack dropStack = getDropStack(state, nodeBE.getOreId());
+                    ItemStack dropStack = getDropStack((ServerLevel) level, pos, state, nodeBE.getOreId(), stack);
 
                     // Pop it on the floor for the player
                     Block.popResource(level, pos, dropStack);
@@ -152,7 +153,7 @@ public class ResourceNodeBlock extends Block implements EntityBlock {
             final String finalOreId = savedOreId;
 
             // Generate drops using our helper method
-            ItemStack dropStack = getDropStack(state, finalOreId);
+            ItemStack dropStack = getDropStack(serverLevel, pos, state, finalOreId, ItemStack.EMPTY);
 
             // Try inserting into ANY adjacent inventory
             for (Direction dir : Direction.values()) {
@@ -187,9 +188,9 @@ public class ResourceNodeBlock extends Block implements EntityBlock {
     }
 
     // ==========================================
-    // 4. SHARED DROP HELPER
+    // 4. SHARED DROP HELPER (Loot Table Driven)
     // ==========================================
-    private ItemStack getDropStack(BlockState state, String oreId) {
+    private ItemStack getDropStack(ServerLevel level, BlockPos pos, BlockState state, String oreId, ItemStack tool) {
         if (oreId == null || oreId.isEmpty() || oreId.equals("minecraft:air")) {
             int index = state.getValue(ORE_INDEX);
             if (index >= 0 && index < SatisfactoryFTBConfig.scannableNodes.size()) {
@@ -198,28 +199,29 @@ public class ResourceNodeBlock extends Block implements EntityBlock {
         }
 
         ResourceLocation loc = ResourceLocation.parse(oreId);
-        Item drop = Items.AIR;
-        String resourceName = loc.getPath().replace("_ore", "");
-        String namespace = loc.getNamespace();
+        Block oreBlock = BuiltInRegistries.BLOCK.get(loc);
+        BlockState oreState = oreBlock.defaultBlockState();
 
-        if (resourceName.equals("coal") || resourceName.equals("compacted_coal")) drop = Items.COAL;
-        else if (resourceName.equals("redstone")) drop = Items.REDSTONE;
-        else if (resourceName.equals("diamond")) drop = Items.DIAMOND;
-        else if (resourceName.equals("emerald")) drop = Items.EMERALD;
-        else if (resourceName.equals("lapis")) drop = Items.LAPIS_LAZULI;
-        else if (resourceName.equals("quartz")) drop = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(namespace, "raw_quartz"));
-        else if (resourceName.equals("sulfur") || resourceName.equals("sam")) drop = BuiltInRegistries.ITEM.get(loc);
-        else {
-            ResourceLocation rawLoc = ResourceLocation.fromNamespaceAndPath(namespace, "raw_" + resourceName);
-            Item rawItem = BuiltInRegistries.ITEM.get(rawLoc);
-            drop = (rawItem != Items.AIR) ? rawItem : BuiltInRegistries.ITEM.get(loc);
-        }
+        // If no tool is provided (e.g., a Drill broke the node), simulate a max-tier tool
+        // so the vanilla loot table doesn't reject the drop for lacking a required tier.
+        ItemStack simulatedTool = (tool == null || tool.isEmpty()) ? new ItemStack(Items.NETHERITE_PICKAXE) : tool;
 
-        if (drop == Items.AIR) drop = Items.IRON_NUGGET;
+        // Build the native Loot Context parameters
+        LootParams.Builder params = new LootParams.Builder(level)
+                .withParameter(LootContextParams.ORIGIN, net.minecraft.world.phys.Vec3.atCenterOf(pos))
+                .withParameter(LootContextParams.TOOL, simulatedTool);
 
-        // Apply purity multiplier
-        int count = (int) Math.pow(2, state.getValue(PURITY));
-        return new ItemStack(drop, count);
+        // Query the underlying ore's actual JSON loot table
+        List<ItemStack> drops = oreState.getDrops(params);
+
+        // Fallback to iron nuggets if the loot table is somehow empty
+        ItemStack finalDrop = drops.isEmpty() ? new ItemStack(Items.IRON_NUGGET) : drops.get(0).copy();
+
+        // Apply purity multiplier to the base loot table drop count
+        int multiplier = (int) Math.pow(2, state.getValue(PURITY));
+        finalDrop.setCount(finalDrop.getCount() * multiplier);
+
+        return finalDrop;
     }
 
     @Override
