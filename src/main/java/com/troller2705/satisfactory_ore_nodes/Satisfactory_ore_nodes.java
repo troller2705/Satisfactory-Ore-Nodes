@@ -49,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(Satisfactory_ore_nodes.MODID)
 public class Satisfactory_ore_nodes
 {
@@ -61,42 +60,79 @@ public class Satisfactory_ore_nodes
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MODID);
 
-    // --- REGISTRATION ---
+    // ==========================================
+    // BLOCK REGISTRATION
+    // ==========================================
 
-    // 1. The Resource Node Block
+    // 1. The Resource Node (Solid Ores)
     public static final DeferredBlock<ResourceNodeBlock> MASTER_NODE = BLOCKS.register("resource_node",
             () -> new ResourceNodeBlock(BlockBehaviour.Properties.of()
                     .mapColor(MapColor.STONE)
-                    .strength(2.0f, 6.0f) // Standard hardness
-                    .noOcclusion())); // Allows the renderer to show through
-
+                    .strength(2.0f, 6.0f)
+                    .noOcclusion()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ResourceNodeBlockEntity>> NODE_BE =
             BLOCK_ENTITY_TYPES.register("node_be", () ->
                     BlockEntityType.Builder.of(ResourceNodeBlockEntity::new, MASTER_NODE.get()).build(null));
 
-    // 2. The Resource Node Item
+    // 2. The Fluid Node
+    public static final DeferredBlock<FluidNodeBlock> FLUID_NODE = BLOCKS.register("fluid_node",
+            () -> new FluidNodeBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.WATER)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidNodeBlockEntity>> FLUID_NODE_BE =
+            BLOCK_ENTITY_TYPES.register("fluid_node_be", () ->
+                    BlockEntityType.Builder.of(FluidNodeBlockEntity::new, FLUID_NODE.get()).build(null));
+
+    // 3. The Geyser Node
+    public static final DeferredBlock<GeyserNodeBlock> GEYSER_NODE = BLOCKS.register("geyser_node",
+            () -> new GeyserNodeBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.STONE)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GeyserNodeBlockEntity>> GEYSER_NODE_BE =
+            BLOCK_ENTITY_TYPES.register("geyser_node_be", () ->
+                    BlockEntityType.Builder.of(GeyserNodeBlockEntity::new, GEYSER_NODE.get()).build(null));
+
+    // ==========================================
+    // ITEM REGISTRATION
+    // ==========================================
+
     public static final DeferredItem<BlockItem> MASTER_NODE_ITEM = ITEMS.register("resource_node",
             () -> new BlockItem(MASTER_NODE.get(), new Item.Properties()));
 
-    // 3. The Scanner Item
+    public static final DeferredItem<BlockItem> FLUID_NODE_ITEM = ITEMS.register("fluid_node",
+            () -> new BlockItem(FLUID_NODE.get(), new Item.Properties()));
+
+    public static final DeferredItem<BlockItem> GEYSER_NODE_ITEM = ITEMS.register("geyser_node",
+            () -> new BlockItem(GEYSER_NODE.get(), new Item.Properties()));
+
     public static final DeferredItem<Item> NODE_SCANNER = ITEMS.register("node_scanner",
             () -> new NodeScannerItem(new Item.Properties()));
 
     public static final DeferredItem<Item> EXTRACTOR_ITEM = ITEMS.register("extractor",
             FicsitExtractorItem::new);
 
-    // 4. Creative Tab
+    // ==========================================
+    // CREATIVE TAB
+    // ==========================================
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> SATISFACTORY_TAB = CREATIVE_MODE_TABS.register("satisfactory_tab",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.satisfactory_ore_nodes"))
                     .icon(() -> new ItemStack(Items.IRON_ORE))
                     .displayItems((parameters, output) -> {
-                        // Always use .get() for Deferred objects
                         output.accept(NODE_SCANNER.get());
                         output.accept(EXTRACTOR_ITEM.get());
                         output.accept(MASTER_NODE_ITEM.get());
+                        output.accept(FLUID_NODE_ITEM.get()); // Added Fluid Node
+                        output.accept(GEYSER_NODE_ITEM.get()); // Added Geyser Node
                     }).build());
+
+    // ==========================================
+    // ATTACHMENTS & SETUP
+    // ==========================================
 
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
             DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, MODID);
@@ -110,21 +146,18 @@ public class Satisfactory_ore_nodes
 
     public Satisfactory_ore_nodes(IEventBus modEventBus, ModContainer modContainer)
     {
-        // Register FTB Library as the Config UI provider
         if (Dist.CLIENT.isClient())
         {
             modContainer.registerExtensionPoint(IConfigScreenFactory.class,
                     (mc, parent) ->
                     {
                         SatisfactoryFTBConfig.openGui();
-                        return null; // FTB opens its own screen immediately
+                        return null;
                     });
         }
 
         SatisfactoryFTBConfig.load();
 
-
-        // Register our registers to the event bus
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
@@ -136,9 +169,6 @@ public class Satisfactory_ore_nodes
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::buildContents);
 
-
-        // This is important: NeoForge.EVENT_BUS is for GAME events (like your BreakEvent)
-        // modEventBus is for REGISTRATION events.
         NeoForge.EVENT_BUS.register(ModEvents.class);
     }
 
@@ -151,10 +181,7 @@ public class Satisfactory_ore_nodes
     {
         event.enqueueWork(() ->
         {
-
-            // NOW run discovery when tags are ready
             SatisfactoryFTBConfig.autoDiscoverOres();
-
             LOGGER.info("Satisfactory Nodes: Discovery complete. Found {} nodes.",
                     SatisfactoryFTBConfig.scannableNodes.size());
         });
@@ -164,9 +191,8 @@ public class Satisfactory_ore_nodes
     {
         if (event.getTabKey() == SATISFACTORY_TAB.getKey())
         {
-            // Run discovery right as the tab is being opened for the first time
             if (SatisfactoryFTBConfig.scannableNodes.size() <= 1)
-            { // 1 is your default Iron Node
+            {
                 SatisfactoryFTBConfig.autoDiscoverOres();
             }
         }
@@ -174,15 +200,17 @@ public class Satisfactory_ore_nodes
 
     private void registerRenderers(net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event)
     {
+        // Ore node uses the dynamic Java renderer
         event.registerBlockEntityRenderer(NODE_BE.get(), ResourceNodeRenderer::new);
+
+        // Fluid node uses the new puddle renderer
+        event.registerBlockEntityRenderer(FLUID_NODE_BE.get(), FluidNodeRenderer::new);
     }
 
     @SubscribeEvent
     public static void registerPackets(final net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) {
         event.registrar("satisfactory_ore_nodes")
-                // The Client telling the Server what they clicked
                 .playToServer(ScannerSelectPacket.TYPE, ScannerSelectPacket.STREAM_CODEC, ScannerSelectPacket::handle)
-                // The Server telling the Client to open the menu with the unlocked data
                 .playToClient(OpenScannerMenuPacket.TYPE, OpenScannerMenuPacket.STREAM_CODEC, OpenScannerMenuPacket::handle);
     }
 }

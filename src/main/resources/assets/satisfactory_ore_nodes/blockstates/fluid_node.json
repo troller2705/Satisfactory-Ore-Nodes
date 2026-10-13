@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "satisfactory_ore_nodes:block/fluid_node" }
+  }
+}

@@ -235,19 +235,39 @@ public class ResourceNodeBlock extends Block implements EntityBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
         ItemStack stack = new ItemStack(this);
-        BlockEntity be = level.getBlockEntity(pos);
 
-        if (be instanceof ResourceNodeBlockEntity nodeBE) {
-            CompoundTag tag = new CompoundTag();
-            tag.putString("oreId", nodeBE.getOreId());
-            tag.putInt("purity", state.getValue(PURITY));
-            BlockItem.setBlockEntityData(stack, Satisfactory_ore_nodes.NODE_BE.get(), tag);
+        if (level.getBlockEntity(pos) instanceof ResourceNodeBlockEntity nodeBE) {
+            String oreId = nodeBE.getOreId();
 
-            String oreName = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(nodeBE.getOreId())).getName().getString();
-            stack.set(DataComponents.CUSTOM_NAME, Component.literal(oreName + " Node"));
+            if (oreId != null && !oreId.isEmpty() && !oreId.equals("minecraft:air")) {
+                net.minecraft.world.level.block.Block baseBlock = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(net.minecraft.resources.ResourceLocation.parse(oreId));
+                String oreName = baseBlock.getName().getString().replaceFirst("(?i)\\s*ore$", "");
+
+                int purityVal = nodeBE.getPurity();
+
+                String purityName = switch (purityVal) {
+                    case 0 -> "Impure";
+                    case 1 -> "Normal";
+                    case 2 -> "Pure";
+                    default -> "Unknown";
+                };
+
+                stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,
+                        net.minecraft.network.chat.Component.literal(oreName + " Node (" + purityName + ")")
+                                .withStyle(net.minecraft.ChatFormatting.WHITE));
+
+                // FIX: Inject the Block Entity's mandatory "id" string into the NBT so the server doesn't crash!
+                net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA, stack, tag -> {
+                    // Dynamically fetches whatever you named your Block Entity in your DeferredRegister
+                    tag.putString("id", net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(Satisfactory_ore_nodes.NODE_BE.get()).toString());
+                    tag.putString("oreId", oreId);
+                    tag.putInt("purity", purityVal);
+                });
+            }
         }
+
         return stack;
     }
 

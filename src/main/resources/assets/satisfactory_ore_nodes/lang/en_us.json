@@ -9,6 +9,7 @@
   "satisfactory_ore_nodes.scanning.scan_duration": "Scan Duration",
   "item.satisfactory_ore_nodes.node_scanner": "Node Scanner",
   "item.satisfactory_ore_nodes.extractor": "FICSIT Extractor",
-  "block.satisfactory_ore_nodes.resource_node": "Resource Node"
-
+  "block.satisfactory_ore_nodes.resource_node": "Resource Node",
+  "block.satisfactory_ore_nodes.fluid_node": "Fluid Node",
+  "block.satisfactory_ore_nodes.geyser_node": "Geyser Node"
 }

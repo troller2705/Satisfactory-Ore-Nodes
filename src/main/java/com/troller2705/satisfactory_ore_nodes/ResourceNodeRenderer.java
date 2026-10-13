@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -27,10 +26,8 @@ public class ResourceNodeRenderer implements BlockEntityRenderer<ResourceNodeBlo
         String visualId = SatisfactoryFTBConfig.scannableNodes.get(index).purities.get(purity).visualBlockId;
         BlockState visualState = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(visualId)).defaultBlockState();
 
-        // FIXED RENDERING CALL
         poseStack.pushPose();
 
-        // Ensure we are using the correct buffer for block rendering
         net.minecraft.client.renderer.RenderType rt = net.minecraft.client.renderer.ItemBlockRenderTypes.getRenderLayer(visualState.getFluidState());
         com.mojang.blaze3d.vertex.VertexConsumer vc = buffer.getBuffer(rt);
 

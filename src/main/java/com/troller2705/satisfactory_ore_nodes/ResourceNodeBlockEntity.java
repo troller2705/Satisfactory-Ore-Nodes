@@ -2,11 +2,17 @@ package com.troller2705.satisfactory_ore_nodes;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Nameable;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
-public class ResourceNodeBlockEntity extends BlockEntity
+public class ResourceNodeBlockEntity extends BlockEntity implements Nameable
 {
     private String oreId = "minecraft:air"; // What ore this node represents
     private int purity = 1; // Default to Normal
@@ -75,5 +81,45 @@ public class ResourceNodeBlockEntity extends BlockEntity
                 this.level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
         }
+    }
+
+    // ==========================================
+    // NAMEABLE IMPLEMENTATION (FOR JADE/WTHIT/TOP)
+    // ==========================================
+
+    @Override
+    public Component getName() {
+        if (this.oreId == null || this.oreId.isEmpty() || this.oreId.equals("minecraft:air")) {
+            return Component.literal("Resource Node");
+        }
+
+        Block baseBlock = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(this.oreId));
+        String oreName = baseBlock.getName().getString().replaceFirst("(?i)\\s*ore$", "");
+
+        String purityName = switch (this.purity) {
+            case 0 -> "Impure";
+            case 1 -> "Normal";
+            case 2 -> "Pure";
+            default -> "Unknown";
+        };
+
+        return Component.literal(oreName + " Node (" + purityName + ")");
+    }
+
+    @Override
+    public boolean hasCustomName() {
+        // Tells Jade that it MUST use our custom name instead of the block registry name
+        return true;
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return getName();
+    }
+
+    @Nullable
+    @Override
+    public Component getCustomName() {
+        return getName();
     }
 }

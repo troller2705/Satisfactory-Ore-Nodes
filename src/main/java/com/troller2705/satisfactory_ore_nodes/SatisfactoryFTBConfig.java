@@ -66,6 +66,7 @@ public class SatisfactoryFTBConfig
             Map.entry("caterium", "Ct"),
             // Fluids / Gases
             Map.entry("water", "H2O"),
+            Map.entry("lava", "Lva"),
             Map.entry("nitrogen", "N"),
             Map.entry("oil", "Oil"),
             Map.entry("crude_oil", "Oil")
@@ -103,6 +104,7 @@ public class SatisfactoryFTBConfig
             Map.entry("limestone", 0xD3D3CB),  // Pale Tan/Grey
             Map.entry("caterium", 0xF0D24D),   // Bright Gold
             Map.entry("water", 0x3498DB),      // Liquid Blue
+            Map.entry("lava", 0xFF5500),       // Magma Orange
             Map.entry("nitrogen", 0x00FFFF),   // Cyan Gas
             Map.entry("oil", 0x111111),        // Pitch Black
             Map.entry("crude_oil", 0x111111)   // Pitch Black
@@ -222,7 +224,7 @@ public class SatisfactoryFTBConfig
     public static boolean showCompass = true;
     public static int scanDuration = 60;
 
-    // This ensures Iron has its correct default symbol and color upon fresh install
+    // Starts completely empty! Everything is auto-discovered now.
     public static List<NodeEntry> scannableNodes = new ArrayList<>();
 
     public static void openGui()
@@ -255,7 +257,7 @@ public class SatisfactoryFTBConfig
                     if (accepted)
                     {
                         value.baseNodeId = editingNode.baseNodeId;
-                        value.hudSymbol = editingNode.hudSymbol; // Added Symbol Editing Support to GUI!
+                        value.hudSymbol = editingNode.hudSymbol;
                         value.baseColor = editingNode.baseColor;
                         value.purities = editingNode.purities;
                         callback.save(true);
@@ -299,12 +301,15 @@ public class SatisfactoryFTBConfig
     public static void autoDiscoverOres() {
         var itemRegistry = BuiltInRegistries.ITEM;
         var blockRegistry = BuiltInRegistries.BLOCK;
+        var fluidRegistry = BuiltInRegistries.FLUID;
 
+        // ==========================================
+        // 1. AUTO-DISCOVER ORES
+        // ==========================================
         itemRegistry.holders().forEach(holder -> {
             String path = holder.key().location().getPath();
             String namespace = holder.key().location().getNamespace();
 
-            // Filter: Must have "ore", NOT be from our mod, and NOT be a deepslate variant
             if ((path.contains("ore") || path.contains("limestone")) && !namespace.equals(Satisfactory_ore_nodes.MODID) && !path.contains("deepslate")) {
                 ResourceLocation loc = holder.key().location();
                 String oreId = loc.toString();
@@ -312,24 +317,18 @@ public class SatisfactoryFTBConfig
                 if (!blockRegistry.containsKey(loc)) return;
                 if (scannableNodes.stream().anyMatch(n -> n.baseNodeId.equals(oreId))) return;
 
-                // Extract base material name (e.g., "iron_ore" -> "iron")
                 String simpleName = path.replace("_ore", "").replace("ore_", "");
 
-                // Retrieve exact symbol from dictionary, OR generate a formatted fallback
                 String symbol;
                 if (ELEMENT_SYMBOLS.containsKey(simpleName)) {
-                    // Uses exact casing from our dictionary so SAM and H2O stay correct
                     symbol = ELEMENT_SYMBOLS.get(simpleName);
                 } else {
-                    // Fallback to auto-guessing the first 2 letters and formatting them (e.g. "Ti")
                     String guessed = simpleName.substring(0, Math.min(simpleName.length(), 2));
                     symbol = guessed.substring(0, 1).toUpperCase() + guessed.substring(1).toLowerCase();
                 }
 
-                // Retrieve assigned color, or default to generic grey
                 int colorHex = ELEMENT_COLORS.getOrDefault(simpleName, 0xAAAAAA);
 
-                // Create: Compacted Logic
                 ResourceLocation compactLoc = ResourceLocation.fromNamespaceAndPath("create_compacted", "compact_" + simpleName);
                 String compactId = blockRegistry.containsKey(compactLoc) ? compactLoc.toString() : oreId;
 
@@ -342,6 +341,58 @@ public class SatisfactoryFTBConfig
                 scannableNodes.add(new NodeEntry(oreId, symbol, Color4I.rgb(colorHex), autoPurities));
             }
         });
+
+        // ==========================================
+        // 2. AUTO-DISCOVER FLUIDS
+        // ==========================================
+        fluidRegistry.holders().forEach(holder -> {
+            String path = holder.key().location().getPath();
+
+            // Skip flowing variants so we don't double-register fluids
+            if (path.contains("flowing")) return;
+
+            // Target essential Satisfactory-themed fluids from any mod
+            if (path.equals("water") || path.equals("lava") || path.contains("oil") || path.contains("nitrogen") || path.contains("fuel")) {
+                String fluidId = holder.key().location().toString();
+
+                if (scannableNodes.stream().anyMatch(n -> n.baseNodeId.equals(fluidId))) return;
+
+                String simpleName = path;
+
+                String symbol;
+                if (ELEMENT_SYMBOLS.containsKey(simpleName)) {
+                    symbol = ELEMENT_SYMBOLS.get(simpleName);
+                } else {
+                    String guessed = simpleName.substring(0, Math.min(simpleName.length(), 2));
+                    symbol = guessed.substring(0, 1).toUpperCase() + guessed.substring(1).toLowerCase();
+                }
+
+                int colorHex = ELEMENT_COLORS.getOrDefault(simpleName, 0x3498DB);
+
+                // Point all fluids to our invisible fluid visual block so the Java puddle renderer can handle it
+                List<PurityEntry> fluidPurities = new ArrayList<>(List.of(
+                        new PurityEntry("Impure", "satisfactory_ore_nodes:fluid_node"),
+                        new PurityEntry("Normal", "satisfactory_ore_nodes:fluid_node"),
+                        new PurityEntry("Pure", "satisfactory_ore_nodes:fluid_node")
+                ));
+
+                scannableNodes.add(new NodeEntry(fluidId, symbol, Color4I.rgb(colorHex), fluidPurities));
+            }
+        });
+
+        // ==========================================
+        // 3. AUTO-DISCOVER GEYSER
+        // ==========================================
+        String geyserId = "satisfactory_ore_nodes:geyser_node";
+        if (scannableNodes.stream().noneMatch(n -> n.baseNodeId.equals(geyserId))) {
+            List<PurityEntry> geyserPurities = new ArrayList<>(List.of(
+                    new PurityEntry("Impure", geyserId),
+                    new PurityEntry("Normal", geyserId),
+                    new PurityEntry("Pure", geyserId)
+            ));
+            scannableNodes.add(new NodeEntry(geyserId, "Gy", Color4I.rgb(0xAAAAAA), geyserPurities));
+        }
+
         save();
     }
 }

@@ -4,27 +4,8 @@
 	scan_duration: 60
 	nodes: [
 		{
-			symbol: "Fe"
-			color: 5636095
-			id: "minecraft:iron_ore"
-			purities: [
-				{
-					visual: "minecraft:iron_ore"
-					label: "Impure"
-				}
-				{
-					visual: "minecraft:iron_ore"
-					label: "Normal"
-				}
-				{
-					visual: "minecraft:iron_ore"
-					label: "Pure"
-				}
-			]
-		}
-		{
-			symbol: "CO"
-			color: 10066329
+			symbol: "C"
+			color: 2763306
 			id: "minecraft:coal_ore"
 			purities: [
 				{
@@ -42,46 +23,27 @@
 			]
 		}
 		{
-			symbol: "DE"
-			color: 10066329
-			id: "minecraft:deepslate_coal_ore"
+			symbol: "Fe"
+			color: 14200723
+			id: "minecraft:iron_ore"
 			purities: [
 				{
-					visual: "minecraft:deepslate_coal_ore"
+					visual: "minecraft:iron_ore"
 					label: "Impure"
 				}
 				{
-					visual: "minecraft:deepslate_coal_ore"
+					visual: "minecraft:iron_ore"
 					label: "Normal"
 				}
 				{
-					visual: "minecraft:deepslate_coal_ore"
+					visual: "minecraft:iron_ore"
 					label: "Pure"
 				}
 			]
 		}
 		{
-			symbol: "DE"
-			color: 10066329
-			id: "minecraft:deepslate_iron_ore"
-			purities: [
-				{
-					visual: "minecraft:deepslate_iron_ore"
-					label: "Impure"
-				}
-				{
-					visual: "minecraft:deepslate_iron_ore"
-					label: "Normal"
-				}
-				{
-					visual: "minecraft:deepslate_iron_ore"
-					label: "Pure"
-				}
-			]
-		}
-		{
-			symbol: "CO"
-			color: 10066329
+			symbol: "Cu"
+			color: 15170646
 			id: "minecraft:copper_ore"
 			purities: [
 				{
@@ -93,33 +55,14 @@
 					label: "Normal"
 				}
 				{
-					visual: "minecraft:copper_block"
+					visual: "minecraft:copper_ore"
 					label: "Pure"
 				}
 			]
 		}
 		{
-			symbol: "DE"
-			color: 10066329
-			id: "minecraft:deepslate_copper_ore"
-			purities: [
-				{
-					visual: "minecraft:deepslate_copper_ore"
-					label: "Impure"
-				}
-				{
-					visual: "minecraft:deepslate_copper_ore"
-					label: "Normal"
-				}
-				{
-					visual: "minecraft:deepslate_copper_ore"
-					label: "Pure"
-				}
-			]
-		}
-		{
-			symbol: "GO"
-			color: 10066329
+			symbol: "Au"
+			color: 16643423
 			id: "minecraft:gold_ore"
 			purities: [
 				{
@@ -137,27 +80,8 @@
 			]
 		}
 		{
-			symbol: "DE"
-			color: 10066329
-			id: "minecraft:deepslate_gold_ore"
-			purities: [
-				{
-					visual: "minecraft:deepslate_gold_ore"
-					label: "Impure"
-				}
-				{
-					visual: "minecraft:deepslate_gold_ore"
-					label: "Normal"
-				}
-				{
-					visual: "minecraft:deepslate_gold_ore"
-					label: "Pure"
-				}
-			]
-		}
-		{
-			symbol: "RE"
-			color: 10066329
+			symbol: "Rs"
+			color: 16711680
 			id: "minecraft:redstone_ore"
 			purities: [
 				{
@@ -175,27 +99,8 @@
 			]
 		}
 		{
-			symbol: "DE"
-			color: 10066329
-			id: "minecraft:deepslate_redstone_ore"
-			purities: [
-				{
-					visual: "minecraft:deepslate_redstone_ore"
-					label: "Impure"
-				}
-				{
-					visual: "minecraft:deepslate_redstone_ore"
-					label: "Normal"
-				}
-				{
-					visual: "minecraft:deepslate_redstone_ore"
-					label: "Pure"
-				}
-			]
-		}
-		{
-			symbol: "EM"
-			color: 10066329
+			symbol: "Em"
+			color: 4322180
 			id: "minecraft:emerald_ore"
 			purities: [
 				{
@@ -213,27 +118,8 @@
 			]
 		}
 		{
-			symbol: "DE"
-			color: 10066329
-			id: "minecraft:deepslate_emerald_ore"
-			purities: [
-				{
-					visual: "minecraft:deepslate_emerald_ore"
-					label: "Impure"
-				}
-				{
-					visual: "minecraft:deepslate_emerald_ore"
-					label: "Normal"
-				}
-				{
-					visual: "minecraft:deepslate_emerald_ore"
-					label: "Pure"
-				}
-			]
-		}
-		{
-			symbol: "LA"
-			color: 10066329
+			symbol: "Lp"
+			color: 2573194
 			id: "minecraft:lapis_ore"
 			purities: [
 				{
@@ -251,27 +137,8 @@
 			]
 		}
 		{
-			symbol: "DE"
-			color: 10066329
-			id: "minecraft:deepslate_lapis_ore"
-			purities: [
-				{
-					visual: "minecraft:deepslate_lapis_ore"
-					label: "Impure"
-				}
-				{
-					visual: "minecraft:deepslate_lapis_ore"
-					label: "Normal"
-				}
-				{
-					visual: "minecraft:deepslate_lapis_ore"
-					label: "Pure"
-				}
-			]
-		}
-		{
-			symbol: "DI"
-			color: 10066329
+			symbol: "C"
+			color: 4910560
 			id: "minecraft:diamond_ore"
 			purities: [
 				{
@@ -289,27 +156,8 @@
 			]
 		}
 		{
-			symbol: "DE"
-			color: 10066329
-			id: "minecraft:deepslate_diamond_ore"
-			purities: [
-				{
-					visual: "minecraft:deepslate_diamond_ore"
-					label: "Impure"
-				}
-				{
-					visual: "minecraft:deepslate_diamond_ore"
-					label: "Normal"
-				}
-				{
-					visual: "minecraft:deepslate_diamond_ore"
-					label: "Pure"
-				}
-			]
-		}
-		{
-			symbol: "NE"
-			color: 10066329
+			symbol: "Ne"
+			color: 11184810
 			id: "minecraft:nether_gold_ore"
 			purities: [
 				{
@@ -327,8 +175,8 @@
 			]
 		}
 		{
-			symbol: "NE"
-			color: 10066329
+			symbol: "Ne"
+			color: 11184810
 			id: "minecraft:nether_quartz_ore"
 			purities: [
 				{
@@ -346,8 +194,8 @@
 			]
 		}
 		{
-			symbol: "HE"
-			color: 10066329
+			symbol: "He"
+			color: 11184810
 			id: "minecraft:heavy_core"
 			purities: [
 				{
@@ -365,8 +213,8 @@
 			]
 		}
 		{
-			symbol: "SP"
-			color: 10066329
+			symbol: "Sp"
+			color: 11184810
 			id: "minecraft:spore_blossom"
 			purities: [
 				{
@@ -384,8 +232,8 @@
 			]
 		}
 		{
-			symbol: "ZI"
-			color: 10066329
+			symbol: "Zn"
+			color: 10860444
 			id: "create:zinc_ore"
 			purities: [
 				{
@@ -403,20 +251,419 @@
 			]
 		}
 		{
-			symbol: "DE"
-			color: 10066329
-			id: "create:deepslate_zinc_ore"
+			symbol: "Ls"
+			color: 13882315
+			id: "create:limestone"
 			purities: [
 				{
-					visual: "create:deepslate_zinc_ore"
+					visual: "create:limestone"
 					label: "Impure"
 				}
 				{
-					visual: "create:deepslate_zinc_ore"
+					visual: "create:limestone"
 					label: "Normal"
 				}
 				{
-					visual: "create:deepslate_zinc_ore"
+					visual: "create:limestone"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Cu"
+			color: 11184810
+			id: "create:cut_limestone"
+			purities: [
+				{
+					visual: "create:cut_limestone"
+					label: "Impure"
+				}
+				{
+					visual: "create:cut_limestone"
+					label: "Normal"
+				}
+				{
+					visual: "create:cut_limestone"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Cu"
+			color: 11184810
+			id: "create:cut_limestone_stairs"
+			purities: [
+				{
+					visual: "create:cut_limestone_stairs"
+					label: "Impure"
+				}
+				{
+					visual: "create:cut_limestone_stairs"
+					label: "Normal"
+				}
+				{
+					visual: "create:cut_limestone_stairs"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Cu"
+			color: 11184810
+			id: "create:cut_limestone_slab"
+			purities: [
+				{
+					visual: "create:cut_limestone_slab"
+					label: "Impure"
+				}
+				{
+					visual: "create:cut_limestone_slab"
+					label: "Normal"
+				}
+				{
+					visual: "create:cut_limestone_slab"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Cu"
+			color: 11184810
+			id: "create:cut_limestone_wall"
+			purities: [
+				{
+					visual: "create:cut_limestone_wall"
+					label: "Impure"
+				}
+				{
+					visual: "create:cut_limestone_wall"
+					label: "Normal"
+				}
+				{
+					visual: "create:cut_limestone_wall"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Po"
+			color: 11184810
+			id: "create:polished_cut_limestone"
+			purities: [
+				{
+					visual: "create:polished_cut_limestone"
+					label: "Impure"
+				}
+				{
+					visual: "create:polished_cut_limestone"
+					label: "Normal"
+				}
+				{
+					visual: "create:polished_cut_limestone"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Po"
+			color: 11184810
+			id: "create:polished_cut_limestone_stairs"
+			purities: [
+				{
+					visual: "create:polished_cut_limestone_stairs"
+					label: "Impure"
+				}
+				{
+					visual: "create:polished_cut_limestone_stairs"
+					label: "Normal"
+				}
+				{
+					visual: "create:polished_cut_limestone_stairs"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Po"
+			color: 11184810
+			id: "create:polished_cut_limestone_slab"
+			purities: [
+				{
+					visual: "create:polished_cut_limestone_slab"
+					label: "Impure"
+				}
+				{
+					visual: "create:polished_cut_limestone_slab"
+					label: "Normal"
+				}
+				{
+					visual: "create:polished_cut_limestone_slab"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Po"
+			color: 11184810
+			id: "create:polished_cut_limestone_wall"
+			purities: [
+				{
+					visual: "create:polished_cut_limestone_wall"
+					label: "Impure"
+				}
+				{
+					visual: "create:polished_cut_limestone_wall"
+					label: "Normal"
+				}
+				{
+					visual: "create:polished_cut_limestone_wall"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Cu"
+			color: 11184810
+			id: "create:cut_limestone_bricks"
+			purities: [
+				{
+					visual: "create:cut_limestone_bricks"
+					label: "Impure"
+				}
+				{
+					visual: "create:cut_limestone_bricks"
+					label: "Normal"
+				}
+				{
+					visual: "create:cut_limestone_bricks"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Cu"
+			color: 11184810
+			id: "create:cut_limestone_brick_stairs"
+			purities: [
+				{
+					visual: "create:cut_limestone_brick_stairs"
+					label: "Impure"
+				}
+				{
+					visual: "create:cut_limestone_brick_stairs"
+					label: "Normal"
+				}
+				{
+					visual: "create:cut_limestone_brick_stairs"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Cu"
+			color: 11184810
+			id: "create:cut_limestone_brick_slab"
+			purities: [
+				{
+					visual: "create:cut_limestone_brick_slab"
+					label: "Impure"
+				}
+				{
+					visual: "create:cut_limestone_brick_slab"
+					label: "Normal"
+				}
+				{
+					visual: "create:cut_limestone_brick_slab"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Cu"
+			color: 11184810
+			id: "create:cut_limestone_brick_wall"
+			purities: [
+				{
+					visual: "create:cut_limestone_brick_wall"
+					label: "Impure"
+				}
+				{
+					visual: "create:cut_limestone_brick_wall"
+					label: "Normal"
+				}
+				{
+					visual: "create:cut_limestone_brick_wall"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Sm"
+			color: 11184810
+			id: "create:small_limestone_bricks"
+			purities: [
+				{
+					visual: "create:small_limestone_bricks"
+					label: "Impure"
+				}
+				{
+					visual: "create:small_limestone_bricks"
+					label: "Normal"
+				}
+				{
+					visual: "create:small_limestone_bricks"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Sm"
+			color: 11184810
+			id: "create:small_limestone_brick_stairs"
+			purities: [
+				{
+					visual: "create:small_limestone_brick_stairs"
+					label: "Impure"
+				}
+				{
+					visual: "create:small_limestone_brick_stairs"
+					label: "Normal"
+				}
+				{
+					visual: "create:small_limestone_brick_stairs"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Sm"
+			color: 11184810
+			id: "create:small_limestone_brick_slab"
+			purities: [
+				{
+					visual: "create:small_limestone_brick_slab"
+					label: "Impure"
+				}
+				{
+					visual: "create:small_limestone_brick_slab"
+					label: "Normal"
+				}
+				{
+					visual: "create:small_limestone_brick_slab"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Sm"
+			color: 11184810
+			id: "create:small_limestone_brick_wall"
+			purities: [
+				{
+					visual: "create:small_limestone_brick_wall"
+					label: "Impure"
+				}
+				{
+					visual: "create:small_limestone_brick_wall"
+					label: "Normal"
+				}
+				{
+					visual: "create:small_limestone_brick_wall"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "La"
+			color: 11184810
+			id: "create:layered_limestone"
+			purities: [
+				{
+					visual: "create:layered_limestone"
+					label: "Impure"
+				}
+				{
+					visual: "create:layered_limestone"
+					label: "Normal"
+				}
+				{
+					visual: "create:layered_limestone"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Li"
+			color: 11184810
+			id: "create:limestone_pillar"
+			purities: [
+				{
+					visual: "create:limestone_pillar"
+					label: "Impure"
+				}
+				{
+					visual: "create:limestone_pillar"
+					label: "Normal"
+				}
+				{
+					visual: "create:limestone_pillar"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "H2O"
+			color: 3447003
+			id: "minecraft:water"
+			purities: [
+				{
+					visual: "satisfactory_ore_nodes:fluid_node"
+					label: "Impure"
+				}
+				{
+					visual: "satisfactory_ore_nodes:fluid_node"
+					label: "Normal"
+				}
+				{
+					visual: "satisfactory_ore_nodes:fluid_node"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Lva"
+			color: 16733440
+			id: "minecraft:lava"
+			purities: [
+				{
+					visual: "satisfactory_ore_nodes:fluid_node"
+					label: "Impure"
+				}
+				{
+					visual: "satisfactory_ore_nodes:fluid_node"
+					label: "Normal"
+				}
+				{
+					visual: "satisfactory_ore_nodes:fluid_node"
+					label: "Pure"
+				}
+			]
+		}
+		{
+			symbol: "Gy"
+			color: 11184810
+			id: "satisfactory_ore_nodes:geyser_node"
+			purities: [
+				{
+					visual: "satisfactory_ore_nodes:geyser_node"
+					label: "Impure"
+				}
+				{
+					visual: "satisfactory_ore_nodes:geyser_node"
+					label: "Normal"
+				}
+				{
+					visual: "satisfactory_ore_nodes:geyser_node"
 					label: "Pure"
 				}
 			]

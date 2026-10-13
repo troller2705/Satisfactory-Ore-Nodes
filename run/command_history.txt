@@ -33,3 +33,7 @@
 /nodes unlock iron_ore
 /nodes unlock diamond_ore
 /nodes lock diamond_ore
+/nodes lock coal_ore
+/nodes lock copper_ore
+/nodes unlock water
+/nodes unlock satisfactory_ore_nodes:geyser_node
